@@ -11,40 +11,7 @@ interface OverviewTabProps {
 
 export default function OverviewTab({ stock }: OverviewTabProps) {
   const { formatPrice, formatNumber, isStealthMode } = useStealthMode()
-  const [selectedPeriod, setSelectedPeriod] = useState('1D')
-
-  // Mock data matching the screenshot
-  const chartData = [
-    { time: '9:30', price: 255.50 },
-    { time: '10:00', price: 256.20 },
-    { time: '10:30', price: 257.80 },
-    { time: '11:00', price: 256.90 },
-    { time: '11:30', price: 258.30 },
-    { time: '12:00', price: 259.10 },
-    { time: '12:30', price: 258.70 },
-    { time: '1:00', price: 257.40 },
-    { time: '1:30', price: 256.80 },
-    { time: '2:00', price: 258.00 },
-    { time: '2:30', price: 258.90 },
-    { time: '3:00', price: 259.50 },
-    { time: '3:30', price: 258.305 }
-  ]
-
-  const stats = {
-    marketCap: '3.83T',
-    volume: '47.4M',
-    avgVolume: '53.8M',
-    peRatio: '39.3',
-    eps: '6.58',
-    earningsDate: 'Oct 30',
-    dividendYield: '0.4%',
-    exDividendDate: 'Nov 8',
-    yearTarget: '$248.75',
-    beta: '1.25',
-    nextEarnings: 'Oct 30',
-    fiftyTwoWeekHigh: '$237.49',
-    fiftyTwoWeekLow: '$164.08'
-  }
+  const [selectedPeriod, setSelectedPeriod] = useState('1y')
 
   const portfolioData = [
     {
@@ -59,102 +26,187 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
     }
   ]
 
-  const periods = ['1D', '5D', '1M', '6M', '1Y', '5Y']
+  const faqQuestions = [
+    "What sector does Apple Inc (AAPL) operate in?",
+    "What is Apple Inc (AAPL) current stock price?",
+    "What is Apple Inc (AAPL) current market capitalization?",
+    "What is Apple Inc (AAPL) price-to-earnings ratio?",
+    "What is Apple Inc (AAPL) price-to-book ratio?",
+    "What is Apple Inc (AAPL) current P/E ratio?",
+    "What is Apple Inc (AAPL) PEG ratio?",
+    "How does Apple Inc (AAPL) perform vs its most recent earnings report?",
+    "What does Apple Inc (AAPL) company do?",
+    "What is Apple Inc (AAPL) book value/equity ratio?"
+  ]
 
   return (
     <div className="space-y-8">
-      {/* Price History Chart */}
-      <Card>
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Price history</h3>
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-            {periods.map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
+      {/* Main Layout - Chart + Sidebar */}
+      <div className="flex gap-8">
+        {/* Left Side - Price History Chart */}
+        <div className="flex-1">
+          <Card>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold">Price history</h3>
+              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                {['7d', '1m', '3m', '6m', 'YTD', '1y', '5y', 'all'].map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setSelectedPeriod(period)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      selectedPeriod === period || period === '1y'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Chart with gradient fill */}
+            <div className="relative h-80">
+              <svg className="w-full h-full" viewBox="0 0 800 300">
+                {/* Gradient definition */}
+                <defs>
+                  <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3"/>
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.05"/>
+                  </linearGradient>
+                </defs>
+                
+                {/* Chart area with gradient fill */}
+                <path
+                  d="M50,250 L100,240 L150,200 L200,180 L250,160 L300,120 L350,140 L400,110 L450,90 L500,80 L550,60 L600,45 L650,40 L700,35 L750,30 L750,280 L50,280 Z"
+                  fill="url(#chartGradient)"
+                />
+                
+                {/* Chart line */}
+                <polyline
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="2"
+                  points="50,250 100,240 150,200 200,180 250,160 300,120 350,140 400,110 450,90 500,80 550,60 600,45 650,40 700,35 750,30"
+                />
+                
+                {/* Current price dot */}
+                <circle cx="750" cy="30" r="4" fill="#3B82F6" />
+                
+                {/* Performance indicator */}
+                <text x="720" y="50" fill="#22C55E" fontSize="12" textAnchor="end">+11.36%</text>
+              </svg>
+              
+              {/* Date range and performance */}
+              <div className="absolute bottom-4 left-4 text-sm text-gray-600">
+                Oct 10, 24 - Oct 10, 25
+              </div>
+              <div className="absolute bottom-4 right-4 text-sm text-green-600 flex items-center">
+                <span>📈 +11.36%</span>
+              </div>
+            </div>
+          </Card>
         </div>
-        
-        {/* Simple Chart Placeholder */}
-        <div className="relative h-64 bg-gradient-to-t from-blue-50 to-transparent rounded-lg">
-          <svg className="w-full h-full" viewBox="0 0 600 200">
-            <polyline
-              fill="none"
-              stroke="#3B82F6"
-              strokeWidth="2"
-              points="50,150 100,140 150,120 200,130 250,110 300,100 350,105 400,125 450,115 500,95 550,80"
-            />
-            <circle cx="550" cy="80" r="4" fill="#3B82F6" />
-          </svg>
-          <div className="absolute bottom-4 right-4 text-sm text-gray-600">
-            Current: {formatPrice(stock.price)}
-          </div>
-        </div>
-      </Card>
 
-      {/* Statistics */}
-      <Card>
-        <h3 className="text-xl font-semibold mb-6">Statistics</h3>
-        <div className="grid grid-cols-2 gap-x-16 gap-y-4">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Market cap</span>
-            <span className="font-medium">{stats.marketCap}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">P/E ratio</span>
-            <span className="font-medium">{stats.peRatio}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Volume</span>
-            <span className="font-medium">{stats.volume}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">EPS</span>
-            <span className="font-medium">{stats.eps}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Avg volume</span>
-            <span className="font-medium">{stats.avgVolume}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Earnings date</span>
-            <span className="font-medium">{stats.earningsDate}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Dividend yield</span>
-            <span className="font-medium">{stats.dividendYield}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Ex-dividend date</span>
-            <span className="font-medium">{stats.exDividendDate}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">1y target est</span>
-            <span className="font-medium">{stats.yearTarget}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Beta (5Y monthly)</span>
-            <span className="font-medium">{stats.beta}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Next earnings date</span>
-            <span className="font-medium">{stats.nextEarnings}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">52-week high</span>
-            <span className="font-medium">{stats.fiftyTwoWeekHigh}</span>
-          </div>
+        {/* Right Side - Statistics Sidebar */}
+        <div className="w-80 space-y-6">
+          {/* Benchmarks */}
+          <Card>
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="font-semibold text-gray-900">Benchmarks</h4>
+              <button className="text-blue-600 text-sm">Select</button>
+            </div>
+          </Card>
+
+          {/* Estimate */}
+          <Card>
+            <h4 className="font-semibold text-gray-900 mb-4">Estimate</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">P/E</span>
+                <span className="font-medium">39.3</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">EPS</span>
+                <span className="font-medium">6.58</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Beta</span>
+                <span className="font-medium">1.165</span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Growth */}
+          <Card>
+            <h4 className="font-semibold text-gray-900 mb-4">Growth</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Revenue, YoY</span>
+                <span className="font-medium">9.63%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Net income, YoY</span>
+                <span className="font-medium">9.26%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">FCF, YoY</span>
+                <span className="font-medium text-red-600">-8.62%</span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Forecast */}
+          <Card>
+            <h4 className="font-semibold text-gray-900 mb-4">Forecast</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">P/E (FWD)</span>
+                <span className="font-medium">32.5</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">EPS (FWD)</span>
+                <span className="font-medium">7.944</span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Dividends */}
+          <Card>
+            <h4 className="font-semibold text-gray-900 mb-4">Dividends</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Dividend yield</span>
+                <span className="font-medium">0.4%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Annual payout</span>
+                <span className="font-medium">$1.04</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Next ex. div date</span>
+                <span className="font-medium">November 11, 25</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payout</span>
+                <span className="font-medium">15.47%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Div.growth, 5y</span>
+                <span className="font-medium">4.99%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Dividend growth streak</span>
+                <span className="font-medium">1 year</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Div.rating</span>
+                <span className="font-medium text-green-600">81</span>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Card>
+      </div>
 
       {/* My Position */}
       <Card>
