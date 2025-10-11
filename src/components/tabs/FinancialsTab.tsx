@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/Card'
 import { useStealthMode } from '@/contexts/StealthContext'
+import PromotionalBanner from '@/components/PromotionalBanner'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { useState } from 'react'
 
@@ -531,6 +532,9 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
     return (
         <div className="bg-gray-50 min-h-screen">
             <div className="container mx-auto px-6 py-6">
+                {/* Promotional Banner */}
+                <PromotionalBanner />
+
                 {/* Interactive Chart Tip */}
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                     <div className="flex items-center gap-2">

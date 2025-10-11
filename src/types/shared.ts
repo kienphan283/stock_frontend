@@ -3,7 +3,14 @@ export interface Stock {
   ticker: string;
   name: string;
   price: number;
+  change?: number;
+  changePercent?: number;
+  marketCap?: number;
+  peRatio?: number;
+  dividendYield?: number;
   sector: string;
+  industry?: string;
+  description?: string;
 }
 
 export interface PortfolioPosition {
