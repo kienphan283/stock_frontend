@@ -37,3 +37,20 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
 }
+
+// Financial types
+export type StatementType = 'income' | 'balance' | 'cash';
+export type PeriodType = 'annual' | 'quarterly';
+
+export interface FinancialDataRequest {
+  ticker: string;
+  statement: StatementType;
+  period: PeriodType;
+}
+
+export interface FinancialDataResponse {
+  ticker: string;
+  statement: StatementType;
+  period: PeriodType;
+  data: any;
+}
