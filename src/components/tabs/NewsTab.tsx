@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/Card'
+import PromotionalBanner from '@/components/PromotionalBanner'
 
 interface NewsTabProps {
   ticker: string
@@ -78,6 +79,9 @@ export default function NewsTab({ ticker }: NewsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Promotional Banner */}
+      <PromotionalBanner />
+      
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Latest News for {ticker}</h3>
         <div className="flex gap-2">
