@@ -6,6 +6,7 @@ import {
   type PeriodType,
   type FinancialDataResponse,
 } from "@/lib/api";
+import PromotionalBanner from "@/components/PromotionalBanner";
 
 interface FinancialsTabProps {
   ticker: string;
@@ -142,6 +143,9 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Promotional Banner */}
+      <PromotionalBanner />
+      
       {/* Controls Card */}
       <Card className="p-6">
         <div className="flex flex-wrap items-center gap-4">
