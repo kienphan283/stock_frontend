@@ -28,14 +28,32 @@ export async function apiRequest<T>(
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("API Error Response:", errorText);
     throw new Error(`API Error: ${response.statusText}`);
   }
 
   const data: ApiResponse<T> = await response.json();
+  console.log("API Response:", { url, data });
 
-  if (!data.success || !data.data) {
-    throw new Error(data.error || "Unknown API error");
+  // Handle different response formats
+  if (data.success === false) {
+    console.error("API returned success=false:", data);
+    throw new Error(data.error || "API request failed");
   }
 
-  return data.data;
+  // If response has success and data properties, extract data
+  if (data.success && data.data) {
+    return data.data;
+  }
+
+  // If response doesn't have success property, assume it's the data itself
+  if (data.success === undefined) {
+    console.log("Response without success wrapper, returning as-is");
+    return data as unknown as T;
+  }
+
+  // If data.success is true but data.data is missing
+  console.error("Invalid API response structure:", data);
+  throw new Error("Invalid API response structure");
 }
