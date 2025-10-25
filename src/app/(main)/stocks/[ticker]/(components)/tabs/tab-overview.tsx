@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { useStealthMode } from "@/contexts/StealthContext";
 import type { Stock } from "@/types";
-import PromotionalBanner from "@/components/PromotionalBanner";
+import PromotionalBanner from "@/components/ui/PromotionalBanner";
 
 interface OverviewTabProps {
   stock: Stock;
