@@ -107,7 +107,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen transition-colors">
-      <div className="container mx-auto px-6 py-6">
+      <div className="py-6">
         {/* Promotional Banner */}
         <PromotionalBanner />
 
