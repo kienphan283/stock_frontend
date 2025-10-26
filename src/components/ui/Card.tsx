@@ -12,12 +12,12 @@ export function Card({
   variant = "default",
   ...props
 }: CardProps) {
-  const baseClasses = "rounded-lg p-6";
+  const baseClasses = "rounded-lg p-6 transition-colors";
 
   const variantClasses = {
-    default: "bg-white border border-gray-200 shadow-sm",
-    elevated: "bg-white shadow-lg border border-gray-100",
-    outlined: "bg-white border-2 border-gray-300 shadow-none",
+    default: "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm",
+    elevated: "bg-white dark:bg-gray-800 shadow-lg border border-gray-100 dark:border-gray-700",
+    outlined: "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 shadow-none",
   };
 
   return (
