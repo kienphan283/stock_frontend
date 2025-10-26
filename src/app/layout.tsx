@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { StealthProvider } from "@/contexts/StealthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,13 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}
+        className={`${inter.className} min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors`}
       >
-        <StealthProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </StealthProvider>
+        <ThemeProvider>
+          <StealthProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </StealthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

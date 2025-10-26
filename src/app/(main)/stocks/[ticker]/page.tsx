@@ -82,10 +82,10 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <div className="max-w-7xl mx-auto py-11 px-6">
         {/* Breadcrumb */}
-        <div className="bg-white border-b border-gray-200 rounded-lg mb-4 px-6 py-3">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-lg mb-4 px-6 py-3">
           <Breadcrumb
             country="United States of America"
             sector="Industrials"

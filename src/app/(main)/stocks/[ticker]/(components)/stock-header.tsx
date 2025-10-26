@@ -36,7 +36,7 @@ export default function StockHeader({
   const isPositive = mockData.priceChange >= 0;
 
   return (
-    <div className="bg-white">
+    <div className="bg-white dark:bg-gray-800 transition-colors">
       <div className="container mx-auto px-6">
         {/* Company Header */}
         <div className="flex items-center justify-between mb-6">
@@ -65,8 +65,8 @@ export default function StockHeader({
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{stock.name}</h1>
-              <div className="flex items-center gap-2 text-gray-600 text-sm">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{stock.name}</h1>
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
                 <span className="font-medium">
                   {stock.ticker} • {exchange}
                 </span>
@@ -107,11 +107,11 @@ export default function StockHeader({
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
                 {formatPrice(stock.price)}
               </span>
               <span
-                className={`text-base font-medium ${isPositive ? "text-green-600" : "text-red-600"
+                className={`text-base font-medium ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                   }`}
               >
                 {isPositive ? "+" : ""}
@@ -128,8 +128,8 @@ export default function StockHeader({
               position="bottom"
             >
               <div>
-                <div className="text-gray-500 mb-1 text-xs">Earnings date</div>
-                <div className="font-medium text-gray-900 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Earnings date</div>
+                <div className="font-medium text-gray-900 dark:text-white text-sm">
                   {mockData.earningsDate}
                 </div>
               </div>
@@ -141,8 +141,8 @@ export default function StockHeader({
               position="bottom"
             >
               <div>
-                <div className="text-gray-500 mb-1 text-xs">P/E</div>
-                <div className="font-medium text-gray-900 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">P/E</div>
+                <div className="font-medium text-gray-900 dark:text-white text-sm">
                   {isStealthMode ? "••••" : mockData.pe}
                 </div>
               </div>
@@ -154,8 +154,8 @@ export default function StockHeader({
               position="bottom"
             >
               <div>
-                <div className="text-gray-500 mb-1 text-xs">EPS</div>
-                <div className="font-medium text-gray-900 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">EPS</div>
+                <div className="font-medium text-gray-900 dark:text-white text-sm">
                   {isStealthMode ? "••••" : mockData.eps}
                 </div>
               </div>
@@ -167,8 +167,8 @@ export default function StockHeader({
               position="bottom"
             >
               <div>
-                <div className="text-gray-500 mb-1 text-xs">Market cap</div>
-                <div className="font-medium text-gray-900 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Market cap</div>
+                <div className="font-medium text-gray-900 dark:text-white text-sm">
                   {isStealthMode ? "••••" : mockData.marketCap}
                 </div>
               </div>
@@ -180,8 +180,8 @@ export default function StockHeader({
               position="bottom"
             >
               <div>
-                <div className="text-gray-500 mb-1 text-xs">Dividend yield</div>
-                <div className="font-medium text-gray-900 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Dividend yield</div>
+                <div className="font-medium text-gray-900 dark:text-white text-sm">
                   {isStealthMode ? "••••" : mockData.dividendYield}
                 </div>
               </div>

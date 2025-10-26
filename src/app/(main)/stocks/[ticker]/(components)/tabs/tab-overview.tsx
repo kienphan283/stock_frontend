@@ -220,8 +220,8 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span
                     className={`font-semibold ${performanceMetrics.change >= 0
-                        ? "text-green-600"
-                        : "text-red-600"
+                      ? "text-green-600"
+                      : "text-red-600"
                       }`}
                   >
                     {isStealthMode
@@ -284,60 +284,6 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                 <div className="flex justify-between">
                   <span className="text-gray-600">FCF, YoY</span>
                   <span className="font-medium text-red-600">-8.62%</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Forecast */}
-            <Card className="bg-white">
-              <h4 className="font-semibold text-gray-900 text-base mb-4">
-                Forecast
-              </h4>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">P/E (FWD)</span>
-                  <span className="font-medium text-gray-900">30.9</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">EPS (FWD)</span>
-                  <span className="font-medium text-gray-900">7.944</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Dividends */}
-            <Card className="bg-white">
-              <h4 className="font-semibold text-gray-900 text-base mb-4">
-                Dividends
-              </h4>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Dividend yield</span>
-                  <span className="font-medium text-gray-900">0.42%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Annual payout</span>
-                  <span className="font-medium text-gray-900">$1.04</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Next ex. div date</span>
-                  <span className="font-medium text-gray-900">November 11, 25</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Payout</span>
-                  <span className="font-medium text-gray-900">15.47%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Div.growth, 5y</span>
-                  <span className="font-medium text-gray-900">4.99%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Dividend growth streak</span>
-                  <span className="font-medium text-gray-900">1 year</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Div.rating</span>
-                  <span className="font-medium text-yellow-500">⭐</span>
                 </div>
               </div>
             </Card>
