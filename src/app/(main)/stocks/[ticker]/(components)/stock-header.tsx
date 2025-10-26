@@ -2,6 +2,8 @@
 
 import type { Stock } from "@/types";
 import { useStealthMode } from "@/contexts/StealthContext";
+import { getCompanyLogo, isLogoImage } from "@/utils/company";
+import Image from "next/image";
 
 interface StockHeaderProps {
   stock: Stock;
@@ -12,9 +14,13 @@ interface StockHeaderProps {
 export default function StockHeader({
   stock,
   exchange = "NYSE",
-  logo = "🏢",
+  logo,
 }: StockHeaderProps) {
   const { formatPrice, isStealthMode } = useStealthMode();
+
+  // Get logo from company data if not provided
+  const displayLogo = logo || getCompanyLogo(stock.ticker);
+  const isImageLogo = isLogoImage(displayLogo);
 
   const mockData = {
     earningsDate: "Nov 19",
@@ -30,16 +36,36 @@ export default function StockHeader({
 
   return (
     <div className="bg-white">
-      <div className="container mx-auto px-6 py-6">
+      <div className="container mx-auto px-6">
         {/* Company Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
-              {logo}
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+              {isImageLogo ? (
+                <Image
+                  src={displayLogo}
+                  alt={`${stock.name} logo`}
+                  width={48}
+                  height={48}
+                  className="object-contain p-1.5"
+                  onError={(e) => {
+                    // Fallback to emoji if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    if (target.parentElement) {
+                      target.parentElement.innerHTML = "🏢";
+                      target.parentElement.className =
+                        "w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-100";
+                    }
+                  }}
+                />
+              ) : (
+                <span className="text-2xl">{displayLogo}</span>
+              )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{stock.name}</h1>
-              <div className="flex items-center gap-2 text-gray-600">
+              <h1 className="text-xl font-bold text-gray-900">{stock.name}</h1>
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
                 <span className="font-medium">
                   {stock.ticker} • {exchange}
                 </span>
@@ -79,14 +105,13 @@ export default function StockHeader({
         {/* Price and Key Metrics */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex items-baseline gap-3 mb-2">
-              <span className="text-4xl font-bold text-gray-900">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-3xl font-bold text-gray-900">
                 {formatPrice(stock.price)}
               </span>
               <span
-                className={`text-lg font-medium ${
-                  isPositive ? "text-green-600" : "text-red-600"
-                }`}
+                className={`text-base font-medium ${isPositive ? "text-green-600" : "text-red-600"
+                  }`}
               >
                 {isPositive ? "+" : ""}
                 {formatPrice(mockData.priceChange)} ({isPositive ? "▲" : "▼"}{" "}
@@ -95,34 +120,34 @@ export default function StockHeader({
             </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-8 text-sm">
+          <div className="grid grid-cols-5 gap-6 text-sm">
             <div>
-              <div className="text-gray-500 mb-1">Earnings date</div>
-              <div className="font-medium text-gray-900">
+              <div className="text-gray-500 mb-1 text-xs">Earnings date</div>
+              <div className="font-medium text-gray-900 text-sm">
                 {mockData.earningsDate}
               </div>
             </div>
             <div>
-              <div className="text-gray-500 mb-1">P/E</div>
-              <div className="font-medium text-gray-900">
+              <div className="text-gray-500 mb-1 text-xs">P/E</div>
+              <div className="font-medium text-gray-900 text-sm">
                 {isStealthMode ? "••••" : mockData.pe}
               </div>
             </div>
             <div>
-              <div className="text-gray-500 mb-1">EPS</div>
-              <div className="font-medium text-gray-900">
+              <div className="text-gray-500 mb-1 text-xs">EPS</div>
+              <div className="font-medium text-gray-900 text-sm">
                 {isStealthMode ? "••••" : mockData.eps}
               </div>
             </div>
             <div>
-              <div className="text-gray-500 mb-1">Market cap</div>
-              <div className="font-medium text-gray-900">
+              <div className="text-gray-500 mb-1 text-xs">Market cap</div>
+              <div className="font-medium text-gray-900 text-sm">
                 {isStealthMode ? "••••" : mockData.marketCap}
               </div>
             </div>
             <div>
-              <div className="text-gray-500 mb-1">Dividend yield</div>
-              <div className="font-medium text-gray-900">
+              <div className="text-gray-500 mb-1 text-xs">Dividend yield</div>
+              <div className="font-medium text-gray-900 text-sm">
                 {isStealthMode ? "••••" : mockData.dividendYield}
               </div>
             </div>

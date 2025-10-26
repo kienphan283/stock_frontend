@@ -152,15 +152,17 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="bg-gray-50">
             <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 font-medium text-gray-900 sticky left-0 bg-white z-10">
-                Line Item
+              <th className="text-left py-3 px-6 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 text-gray-400">⋮</span>
+                </div>
               </th>
               {data.periods.map((period) => (
                 <th
                   key={period}
-                  className="text-center py-3 px-4 font-medium text-gray-500 min-w-[120px]"
+                  className="text-right py-3 px-6 font-medium text-gray-600 min-w-[120px]"
                 >
                   {period}
                 </th>
@@ -168,36 +170,37 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(data.data).map(([itemName, values]) => {
+            {Object.entries(data.data).map(([itemName, values], index) => {
               const isSelected = selectedMetrics.includes(itemName);
               const selectedIndex = selectedMetrics.indexOf(itemName);
               const barColor = isSelected
                 ? CHART_COLORS.primary[
-                    selectedIndex % CHART_COLORS.primary.length
-                  ]
+                selectedIndex % CHART_COLORS.primary.length
+                ]
                 : "transparent";
 
               return (
                 <tr
                   key={itemName}
                   onClick={() => toggleMetric(itemName)}
-                  className={`border-b border-gray-100 cursor-pointer transition-all ${
-                    isSelected
-                      ? "bg-blue-50/50 hover:bg-blue-50"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className={`border-b border-gray-100 cursor-pointer transition-all ${index % 2 === 0 ? "bg-gray-50/50" : "bg-white"
+                    } ${isSelected
+                      ? "!bg-blue-50 hover:!bg-blue-100"
+                      : "hover:bg-gray-100"
+                    }`}
                 >
-                  <td className="py-3 px-4 text-gray-700 sticky left-0 bg-inherit">
-                    <div className="relative">
-                      {/* Color indicator khi được chọn */}
+                  <td className="py-3 px-6 text-gray-700 sticky left-0 bg-inherit">
+                    <div className="relative flex items-center gap-2">
                       <div
-                        className="absolute left-[-16px] top-[-12px] bottom-[-12px] w-1 transition-all rounded-r"
-                        style={{ backgroundColor: barColor }}
+                        className="w-1 h-6 rounded-full transition-all"
+                        style={{
+                          backgroundColor: barColor,
+                          opacity: isSelected ? 1 : 0
+                        }}
                       />
                       <span
-                        className={`font-medium ${
-                          isSelected ? "text-gray-900" : "text-gray-700"
-                        }`}
+                        className={`text-sm ${isSelected ? "font-medium text-gray-900" : "text-gray-700"
+                          }`}
                       >
                         {itemName}
                       </span>
@@ -206,7 +209,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                   {data.periods.map((period) => (
                     <td
                       key={period}
-                      className="py-3 px-4 text-center text-gray-700"
+                      className="py-3 px-6 text-right text-gray-700 text-sm"
                     >
                       {formatValue(values[period])}
                     </td>
@@ -225,103 +228,120 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
       {/* Promotional Banner */}
       <PromotionalBanner />
 
-      {/* Hint Card */}
-      <Card className="p-4 bg-yellow-50 border-yellow-200">
-        <div className="flex items-start gap-2 text-sm text-gray-700">
-          <span className="text-yellow-500 text-lg">💡</span>
-          <div className="flex-1">
-            <p className="font-medium">
-              Click on any row in the table to visualize it on the chart
-            </p>
-            <p className="text-gray-600 text-xs mt-1">
-              You can select up to 8 metrics at once
-            </p>
-          </div>
-          {selectedMetrics.length > 0 && (
-            <button
-              onClick={clearAllMetrics}
-              className="ml-auto text-blue-600 hover:text-blue-700 font-medium text-sm whitespace-nowrap"
-            >
-              Clear all ({selectedMetrics.length})
-            </button>
-          )}
+      {/* Controls - Tabs and Dropdowns */}
+      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+        {/* Statement Type Tabs */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab("income")}
+            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "income"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            Income statement
+          </button>
+          <button
+            onClick={() => setActiveTab("balance")}
+            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "balance"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            Balance sheet
+          </button>
+          <button
+            onClick={() => setActiveTab("cashflow")}
+            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "cashflow"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            Cash flow
+          </button>
+          <button
+            onClick={() => setActiveTab("statistics")}
+            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "statistics"
+                ? "bg-gray-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            Statistics
+          </button>
         </div>
-      </Card>
 
-      {/* Controls Card */}
-      <Card className="p-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Statement Type Tabs */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab("income")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === "income"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+        {/* Period Type and Display Format Selectors */}
+        <div className="flex gap-3">
+          <div className="relative">
+            <select
+              value={periodType}
+              onChange={(e) => setPeriodType(e.target.value as PeriodType)}
+              className="appearance-none px-4 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Income Statement
-            </button>
-            <button
-              onClick={() => setActiveTab("balance")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === "balance"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              <option value="annual">Annual</option>
+              <option value="quarterly">Quarterly</option>
+            </select>
+            <svg
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Balance Sheet
-            </button>
-            <button
-              onClick={() => setActiveTab("cashflow")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === "cashflow"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Cash Flow
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </div>
 
-          {/* Period Type Selector */}
-          <div className="flex gap-2 ml-auto">
-            <button
-              onClick={() => setPeriodType("quarterly")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                periodType === "quarterly"
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+          <div className="relative">
+            <select
+              value={displayFormat}
+              onChange={(e) => setDisplayFormat(e.target.value as DisplayFormat)}
+              className="appearance-none px-4 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Quarterly
-            </button>
-            <button
-              onClick={() => setPeriodType("annual")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                periodType === "annual"
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              <option value="values">Values, USD</option>
+              <option value="changes">Changes, %</option>
+              <option value="yoy">YoY Growth, %</option>
+            </select>
+            <svg
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Annual
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Chart Card - Show when metrics are selected */}
       {!loading && !error && getCurrentData() && selectedMetrics.length > 0 && (
         <Card className="p-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              📊 Visualization
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              {selectedMetrics.length} metric
-              {selectedMetrics.length > 1 ? "s" : ""} selected
-            </p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                📊 Visualization
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {selectedMetrics.length} metric
+                {selectedMetrics.length > 1 ? "s" : ""} selected
+              </p>
+            </div>
+            <button
+              onClick={clearAllMetrics}
+              className="text-sm text-gray-600 hover:text-gray-900 underline"
+            >
+              Clear all
+            </button>
           </div>
           <AnimatedBarChart
             data={getChartData()}
@@ -338,25 +358,17 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
       )}
 
       {/* Data Card */}
-      <Card className="p-6">
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {getTabTitle()}
-          </h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Company: {ticker} | Period: {periodType}
-          </p>
-        </div>
+      <Card className="p-0 overflow-hidden">
 
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="text-center py-12 px-6">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
             <p className="mt-4 text-gray-600">Loading financial data...</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 m-6">
             <p className="font-medium">Error loading financial data</p>
             <p className="text-sm mt-1">{error}</p>
           </div>
@@ -370,41 +382,6 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
           </div>
         )}
       </Card>
-
-      {/* Data Summary Card */}
-      {!loading && !error && getCurrentData() && (
-        <Card className="p-6 bg-blue-50">
-          <h4 className="font-semibold text-gray-900 mb-2">Data Summary</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Company</p>
-              <p className="font-medium text-gray-900">
-                {getCurrentData()?.company}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600">Statement Type</p>
-              <p className="font-medium text-gray-900">
-                {getCurrentData()?.type}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600">Periods Available</p>
-              <p className="font-medium text-gray-900">
-                {getCurrentData()?.periods.length}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600">Line Items</p>
-              <p className="font-medium text-gray-900">
-                {getCurrentData()?.data
-                  ? Object.keys(getCurrentData()!.data).length
-                  : 0}
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

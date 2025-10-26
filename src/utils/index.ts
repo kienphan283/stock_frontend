@@ -25,3 +25,4 @@ export function debounce<T extends (...args: any[]) => any>(
 // Re-export utilities from other modules
 export * from "./format";
 export * from "./date";
+export * from "./company";

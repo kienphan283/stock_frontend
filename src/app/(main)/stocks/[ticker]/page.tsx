@@ -83,9 +83,9 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6 py-3">
+      <div className="max-w-7xl mx-auto py-11 px-6">
+        {/* Breadcrumb */}
+        <div className="bg-white border-b border-gray-200 rounded-lg mb-4 px-6 py-3">
           <Breadcrumb
             country="United States of America"
             sector="Industrials"
@@ -93,19 +93,19 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
             ticker={stock.ticker}
           />
         </div>
+
+        {/* Stock Header with Company Info */}
+        <StockHeader stock={stock} />
+
+        {/* Tab Navigation */}
+        <StockTabNavigation
+          activeTab={activeTab as StockTabId}
+          onTabChange={changeTab}
+        />
+
+        {/* Tab Content */}
+        <div className="min-h-screen">{renderTabContent()}</div>
       </div>
-
-      {/* Stock Header with Company Info */}
-      <StockHeader stock={stock} />
-
-      {/* Tab Navigation */}
-      <StockTabNavigation
-        activeTab={activeTab as StockTabId}
-        onTabChange={changeTab}
-      />
-
-      {/* Tab Content */}
-      <div className="min-h-screen">{renderTabContent()}</div>
     </div>
   );
 }

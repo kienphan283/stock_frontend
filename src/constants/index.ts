@@ -1,6 +1,6 @@
 // API and application constants
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 export const DEFAULT_TICKER = "AAPL";
 export const ITEMS_PER_PAGE = 20;
 

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { useStealthMode } from "@/contexts/StealthContext";
 import type { Stock } from "@/types";
 import PromotionalBanner from "@/components/PromotionalBanner";
+import CompanyInfo from "@/components/shared/CompanyInfo";
 
 interface OverviewTabProps {
   stock: Stock;
@@ -13,80 +14,6 @@ interface OverviewTabProps {
 export default function OverviewTab({ stock }: OverviewTabProps) {
   const { formatPrice, formatNumber, isStealthMode } = useStealthMode();
   const [selectedPeriod, setSelectedPeriod] = useState("1y");
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-
-  const faqData = [
-    {
-      question: "What sector does Apple Inc (AAPL) operate in?",
-      answer:
-        "Apple Inc belongs to the Information Technology sector and operates in the Consumer Electronics industry.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) current stock price?",
-      answer:
-        "As of the latest data, Apple Inc stock price is $245.27, with a previous close of $254.04. Apple Inc lost -$8.77 in the last trading session, representing a -3.45% loss.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) current market capitalization?",
-      answer: "Apple Inc market cap is approximately 3.64 trillion.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) Earnings Per Share (EPS)?",
-      answer: "The trailing EPS is $6.58, and the forward EPS is $7.94.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) Price-to-Earnings (P/E) ratio?",
-      answer:
-        "Apple Inc current P/E ratio is 37.28, with a forward P/E of 30.87.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) EBITDA?",
-      answer:
-        "Apple Inc EBITDA (Earnings Before Interest, Taxes, Depreciation, and Amortization) is 31.03 billion.",
-    },
-    {
-      question: "Does Apple Inc (AAPL) pay dividends?",
-      answer:
-        "Yes, Apple Inc pays quarterly dividends with an annualized yield of 0.42% and an estimated annual payout of $1.04 per share.",
-    },
-    {
-      question: "When is the next ex-dividend date for Apple Inc (AAPL)?",
-      answer: "The next ex-dividend date is scheduled for November 11, 2025.",
-    },
-    {
-      question:
-        "How did Apple Inc (AAPL) perform in its most recent earnings report?",
-      answer:
-        "In the last report (June 30, 2025), Apple Inc posted an EPS surprise of 11.35% and a revenue surprise of 5.47%.",
-    },
-    {
-      question: "When is Apple Inc (AAPL) next earnings report?",
-      answer:
-        "Apple Inc is expected to release its next earnings report on September 30, 2025.",
-    },
-    {
-      question: "What is Apple Inc (AAPL) beta (volatility) score?",
-      answer:
-        "Apple Inc has a beta of 1.165, meaning its volatility is roughly in line with the market.",
-    },
-  ];
-
-  const toggleFAQ = (index: number) => {
-    setOpenFAQ(openFAQ === index ? null : index);
-  };
-
-  const faqQuestions = [
-    "What sector does Apple Inc (AAPL) operate in?",
-    "What is Apple Inc (AAPL) current stock price?",
-    "What is Apple Inc (AAPL) current market capitalization?",
-    "What is Apple Inc (AAPL) price-to-earnings ratio?",
-    "What is Apple Inc (AAPL) price-to-book ratio?",
-    "What is Apple Inc (AAPL) current P/E ratio?",
-    "What is Apple Inc (AAPL) PEG ratio?",
-    "How does Apple Inc (AAPL) perform vs its most recent earnings report?",
-    "What does Apple Inc (AAPL) company do?",
-    "What is Apple Inc (AAPL) book value/equity ratio?",
-  ];
 
   return (
     <div className="bg-white min-h-screen">
@@ -174,11 +101,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                       <button
                         key={period}
                         onClick={() => setSelectedPeriod(period)}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                          selectedPeriod === period
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${selectedPeriod === period
                             ? "bg-blue-50 text-blue-700 border border-blue-200"
                             : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                        }`}
+                          }`}
                       >
                         {period}
                       </button>
@@ -514,148 +440,8 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
           </div>
         </div>
 
-        {/* About the company */}
-        <Card className="mb-6">
-          <h3 className="text-xl font-semibold mb-6">About the company</h3>
-
-          {/* Company Info Table */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 pb-6 border-b border-gray-200">
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Ticker
-              </label>
-              <div className="text-base font-semibold text-gray-900">AAPL</div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Country
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                United States of America
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Currency
-              </label>
-              <div className="text-base font-semibold text-gray-900">USD</div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Exchange
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                NASDAQ
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Industry
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                Information Technology
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Sector
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                Technology Hardware & Equipment
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Market cap
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                $3.77T
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">
-                Employees
-              </label>
-              <div className="text-base font-semibold text-gray-900">
-                161,000
-              </div>
-            </div>
-          </div>
-          <div className="space-y-4 text-gray-700 leading-relaxed text-sm">
-            <p>
-              Apple Inc. designs, manufactures, and markets smartphones,
-              personal computers, tablets, wearables, and accessories worldwide.
-              The company offers iPhone, a line of smartphones; Mac, a line of
-              personal computers; iPad, a line of multi-purpose tablets; and
-              wearables, home, and accessories comprising AirPods, Apple TV,
-              Apple Watch, Beats products, and HomePod.
-            </p>
-            <p>
-              The company also provides AppleCare support and cloud services;
-              and operates various platforms, including the App Store that allow
-              customers to discover and download applications and digital
-              content, such as books, music, video, games, and podcasts. In
-              addition, it offers various services, such as Apple Arcade, a game
-              subscription service; Apple Fitness+, a personalized fitness
-              service; Apple Music, which offers users a curated listening
-              experience with on-demand radio stations; Apple News+, a
-              subscription news and magazine service; Apple TV+, which offers
-              exclusive original content; Apple Card, a co-branded credit card;
-              and Apple Pay, a mobile payment service, as well as licenses its
-              intellectual property.
-            </p>
-            <p>
-              The company serves consumers, and small and mid-sized businesses;
-              and the education, enterprise, and government markets. It
-              distributes third-party applications for its products through the
-              App Store. The company also sells its products through its retail
-              and online stores, and direct sales force; and third-party
-              cellular network carriers, wholesalers, retailers, and resellers.
-              Apple Inc. was incorporated in 1977 and is headquartered in
-              Cupertino, California.
-            </p>
-          </div>
-        </Card>
-
-        {/* FAQ */}
-        <Card className="mb-6">
-          <h3 className="text-xl font-semibold mb-6">
-            Frequently asked questions
-          </h3>
-          <div className="space-y-4">
-            {faqData.map((faq, index) => (
-              <div key={index} className="border-b border-gray-200 pb-3">
-                <button
-                  onClick={() => toggleFAQ(index)}
-                  className="text-left w-full flex justify-between items-center text-gray-800 hover:text-blue-600 transition-colors py-3"
-                >
-                  <span className="font-medium pr-4">{faq.question}</span>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ${
-                      openFAQ === index ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {openFAQ === index && (
-                  <div className="mt-3 pb-3 text-gray-600 text-sm leading-relaxed animate-in slide-in-from-top-1 duration-200">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
+        {/* Company Information with Description and FAQs */}
+        <CompanyInfo ticker={stock.ticker} />
       </div>
     </div>
   );
