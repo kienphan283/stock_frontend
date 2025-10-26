@@ -189,17 +189,17 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-6 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10">
+          <thead className="bg-gray-50 dark:bg-gray-800">
+            <tr className="border-b border-gray-200 dark:border-gray-700">
+              <th className="text-left py-3 px-6 font-medium text-gray-600 dark:text-gray-400 sticky left-0 bg-gray-50 dark:bg-gray-800 z-10">
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 text-gray-400">⋮</span>
+                  <span className="w-4 h-4 text-gray-400 dark:text-gray-500">⋮</span>
                 </div>
               </th>
               {data.periods.map((period) => (
                 <th
                   key={period}
-                  className="text-right py-3 px-6 font-medium text-gray-600 min-w-[120px]"
+                  className="text-right py-3 px-6 font-medium text-gray-600 dark:text-gray-400 min-w-[120px]"
                 >
                   {period}
                 </th>
@@ -220,13 +220,13 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                 <tr
                   key={itemName}
                   onClick={() => toggleMetric(itemName)}
-                  className={`border-b border-gray-100 cursor-pointer transition-all ${index % 2 === 0 ? "bg-gray-50/50" : "bg-white"
+                  className={`border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-all ${index % 2 === 0 ? "bg-gray-50/50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-900"
                     } ${isSelected
-                      ? "!bg-blue-50 hover:!bg-blue-100"
-                      : "hover:bg-gray-100"
+                      ? "!bg-blue-50 dark:!bg-blue-900/30 hover:!bg-blue-100 dark:hover:!bg-blue-900/50"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                 >
-                  <td className="py-3 px-6 text-gray-700 sticky left-0 bg-inherit">
+                  <td className="py-3 px-6 text-gray-700 dark:text-gray-300 sticky left-0 bg-inherit">
                     <div className="relative flex items-center gap-2">
                       <div
                         className="w-1 h-6 rounded-full transition-all"
@@ -236,7 +236,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                         }}
                       />
                       <span
-                        className={`text-sm ${isSelected ? "font-medium text-gray-900" : "text-gray-700"
+                        className={`text-sm ${isSelected ? "font-medium text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"
                           }`}
                       >
                         {itemName}
@@ -246,7 +246,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                   {data.periods.map((period) => (
                     <td
                       key={period}
-                      className="py-3 px-6 text-right text-gray-700 text-sm"
+                      className="py-3 px-6 text-right text-gray-700 dark:text-gray-300 text-sm"
                     >
                       {formatValueForTable(values[period])}
                     </td>
@@ -266,14 +266,14 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
       <PromotionalBanner />
 
       {/* Controls - Tabs and Dropdowns */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
         {/* Statement Type Tabs */}
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab("income")}
             className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "income"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-gray-800 dark:bg-gray-700 text-white"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
           >
             Income statement
@@ -281,8 +281,8 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
           <button
             onClick={() => setActiveTab("balance")}
             className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "balance"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-gray-800 dark:bg-gray-700 text-white"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
           >
             Balance sheet
@@ -290,8 +290,8 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
           <button
             onClick={() => setActiveTab("cashflow")}
             className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "cashflow"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-gray-800 dark:bg-gray-700 text-white"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
           >
             Cash flow
@@ -299,8 +299,8 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
           <button
             onClick={() => setActiveTab("statistics")}
             className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-colors ${activeTab === "statistics"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-gray-800 dark:bg-gray-700 text-white"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
           >
             Statistics
@@ -313,13 +313,13 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
             <select
               value={periodType}
               onChange={(e) => setPeriodType(e.target.value as PeriodType)}
-              className="appearance-none px-4 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="appearance-none px-4 py-2 pr-8 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="annual">Annual</option>
               <option value="quarterly">Quarterly</option>
             </select>
             <svg
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -337,14 +337,14 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
             <select
               value={displayFormat}
               onChange={(e) => setDisplayFormat(e.target.value as DisplayFormat)}
-              className="appearance-none px-4 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="appearance-none px-4 py-2 pr-8 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="values">Values, USD</option>
               <option value="changes">Changes, %</option>
               <option value="yoy">YoY Growth, %</option>
             </select>
             <svg
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -365,17 +365,17 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 📊 Visualization
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {selectedMetrics.length} metric
                 {selectedMetrics.length > 1 ? "s" : ""} selected
               </p>
             </div>
             <button
               onClick={clearAllMetrics}
-              className="text-sm text-gray-600 hover:text-gray-900 underline"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white underline"
             >
               Clear all
             </button>
@@ -406,13 +406,13 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
 
         {loading && (
           <div className="text-center py-12 px-6">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
-            <p className="mt-4 text-gray-600">Loading financial data...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 dark:border-gray-400"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading financial data...</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 m-6">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-400 m-6">
             <p className="font-medium">Error loading financial data</p>
             <p className="text-sm mt-1">{error}</p>
           </div>
@@ -421,7 +421,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
         {!loading && !error && renderFinancialTable()}
 
         {!loading && !error && !getCurrentData() && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>No financial data available</p>
           </div>
         )}

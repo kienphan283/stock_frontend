@@ -106,7 +106,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
   }, [priceHistoryData]);
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white dark:bg-gray-900 min-h-screen transition-colors">
       <div className="container mx-auto px-6 py-6">
         {/* Promotional Banner */}
         <PromotionalBanner />
@@ -116,10 +116,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
           {/* Left Column - Benchmarks + Price History (takes 2/3 width) */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Benchmarks - Top Left */}
-            <Card className="bg-white">
+            <Card>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-gray-900 text-base">
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-base">
                     Benchmarks
                   </h4>
                   {/* Lock icon for unauthenticated state */}
@@ -141,18 +141,18 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
             </Card>
 
             {/* Price History - Bottom Left - Flex grow to match right column height */}
-            <Card className="bg-white flex-1">
+            <Card className="flex-1">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Price history
                 </h3>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-700 font-medium text-sm">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">
                       Price ($)
                     </span>
                     <svg
-                      className="w-4 h-4 text-gray-500"
+                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -165,7 +165,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                       />
                     </svg>
                   </div>
-                  <button className="p-1 text-gray-400 hover:text-gray-600">
+                  <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -192,15 +192,15 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                         key={period}
                         onClick={() => setSelectedPeriod(period)}
                         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${selectedPeriod === period
-                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                          : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
                           }`}
                       >
                         {period}
                       </button>
                     )
                   )}
-                  <button className="px-2 py-1.5 text-gray-500 hover:bg-gray-50 rounded-md ml-1">
+                  <button className="px-2 py-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md ml-1">
                     <svg
                       width="16"
                       height="16"
@@ -214,14 +214,14 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
 
                 {/* Performance indicator */}
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500 font-medium">
+                  <span className="text-gray-500 dark:text-gray-400 font-medium">
                     {isStealthMode ? "•••• - ••••" : performanceMetrics.dateRange}
                   </span>
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span
                     className={`font-semibold ${performanceMetrics.change >= 0
-                      ? "text-green-600"
-                      : "text-red-600"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
                       }`}
                   >
                     {isStealthMode
@@ -232,7 +232,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
               </div>
 
               {/* Chart Container - Sử dụng PriceHistoryChart component */}
-              <div className="relative min-h-[450px] bg-white">
+              <div className="relative min-h-[450px]">
                 <PriceHistoryChart
                   data={priceHistoryData}
                   height={450}
@@ -247,43 +247,43 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
           {/* Right Column - All Metrics (takes 1/3 width) */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             {/* Estimate */}
-            <Card className="bg-white">
-              <h4 className="font-semibold text-gray-900 text-base mb-4">
+            <Card>
+              <h4 className="font-semibold text-gray-900 dark:text-white text-base mb-4">
                 Estimate
               </h4>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">P/E</span>
-                  <span className="font-medium text-gray-900">37.3</span>
+                  <span className="text-gray-600 dark:text-gray-400">P/E</span>
+                  <span className="font-medium text-gray-900 dark:text-white">37.3</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">EPS</span>
-                  <span className="font-medium text-gray-900">6.58</span>
+                  <span className="text-gray-600 dark:text-gray-400">EPS</span>
+                  <span className="font-medium text-gray-900 dark:text-white">6.58</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Beta</span>
-                  <span className="font-medium text-gray-900">1.165</span>
+                  <span className="text-gray-600 dark:text-gray-400">Beta</span>
+                  <span className="font-medium text-gray-900 dark:text-white">1.165</span>
                 </div>
               </div>
             </Card>
 
             {/* Growth */}
-            <Card className="bg-white">
-              <h4 className="font-semibold text-gray-900 text-base mb-4">
+            <Card>
+              <h4 className="font-semibold text-gray-900 dark:text-white text-base mb-4">
                 Growth
               </h4>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Revenue, YoY</span>
-                  <span className="font-medium text-green-600">9.63%</span>
+                  <span className="text-gray-600 dark:text-gray-400">Revenue, YoY</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">9.63%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Net income, YoY</span>
-                  <span className="font-medium text-green-600">9.26%</span>
+                  <span className="text-gray-600 dark:text-gray-400">Net income, YoY</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">9.26%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">FCF, YoY</span>
-                  <span className="font-medium text-red-600">-8.62%</span>
+                  <span className="text-gray-600 dark:text-gray-400">FCF, YoY</span>
+                  <span className="font-medium text-red-600 dark:text-red-400">-8.62%</span>
                 </div>
               </div>
             </Card>
