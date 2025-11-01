@@ -29,6 +29,17 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
         const resolvedParams = await params;
         setTicker(resolvedParams.ticker);
         const stockData = await stockService.getStock(resolvedParams.ticker);
+
+        // Fetch price change data from database
+        try {
+          const priceChangeData = await stockService.getPriceChange(resolvedParams.ticker);
+          stockData.priceChange = priceChangeData.absoluteChange;
+          stockData.priceChangePercent = priceChangeData.percentageChange;
+        } catch (priceErr) {
+          console.warn("Could not fetch price change data:", priceErr);
+          // Continue without price change data (fallback to defaults)
+        }
+
         setStock(stockData);
       } catch (err) {
         setError("Stock not found");

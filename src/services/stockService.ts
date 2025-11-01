@@ -1,5 +1,5 @@
 // Stock service - API calls for stock data
-import { apiRequest } from "./apiBase";
+import { apiRequest, PYTHON_API_URL } from "./apiBase";
 import type {
   Stock,
   DividendEvent,
@@ -8,6 +8,14 @@ import type {
   StatementType,
   PeriodType,
 } from "@/types";
+
+export interface PriceChangeData {
+  ticker: string;
+  currentPrice: number;
+  previousClose: number;
+  absoluteChange: number;
+  percentageChange: number;
+}
 
 export const stockService = {
   /**
@@ -76,5 +84,16 @@ export const stockService = {
     return apiRequest<Stock[]>(
       `/api/stocks/search?q=${encodeURIComponent(query)}`
     );
+  },
+
+  /**
+   * Get price change data for a stock (from FastAPI)
+   */
+  async getPriceChange(ticker: string): Promise<PriceChangeData> {
+    const response = await fetch(`${PYTHON_API_URL}/api/stocks/${ticker}/price-change`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch price change for ${ticker}`);
+    }
+    return response.json();
   },
 };
