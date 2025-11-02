@@ -5,6 +5,8 @@ export interface Stock {
   name: string;
   price: number;
   sector: string;
+  priceChange?: number;
+  priceChangePercent?: number;
 }
 
 export interface DividendEvent {

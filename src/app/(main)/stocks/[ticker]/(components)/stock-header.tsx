@@ -23,17 +23,10 @@ export default function StockHeader({
   const displayLogo = logo || getCompanyLogo(stock.ticker);
   const isImageLogo = isLogoImage(displayLogo);
 
-  const mockData = {
-    earningsDate: "Nov 19",
-    pe: "24.5",
-    eps: "18.88",
-    marketCap: "$125.13B",
-    dividendYield: "1.4%",
-    priceChange: 1.06,
-    priceChangePercent: 0.23,
-  };
-
-  const isPositive = mockData.priceChange >= 0;
+  // Use real price change data from database, fallback to defaults if not available
+  const priceChange = stock.priceChange ?? 0;
+  const priceChangePercent = stock.priceChangePercent ?? 0;
+  const isPositive = priceChange >= 0;
 
   return (
     <div className="bg-white dark:bg-gray-800 transition-colors">
@@ -115,8 +108,8 @@ export default function StockHeader({
                   }`}
               >
                 {isPositive ? "+" : ""}
-                {formatPrice(mockData.priceChange)} ({isPositive ? "▲" : "▼"}{" "}
-                {mockData.priceChangePercent}%)
+                {formatPrice(priceChange)} ({isPositive ? "▲" : "▼"}{" "}
+                {Math.abs(priceChangePercent).toFixed(2)}%)
               </span>
             </div>
           </div>
@@ -130,7 +123,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Earnings date</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {mockData.earningsDate}
+                  —
                 </div>
               </div>
             </Tooltip>
@@ -143,7 +136,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">P/E</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : mockData.pe}
+                  {isStealthMode ? "••••" : "—"}
                 </div>
               </div>
             </Tooltip>
@@ -156,7 +149,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">EPS</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : mockData.eps}
+                  {isStealthMode ? "••••" : "—"}
                 </div>
               </div>
             </Tooltip>
@@ -169,7 +162,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Market cap</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : mockData.marketCap}
+                  {isStealthMode ? "••••" : "—"}
                 </div>
               </div>
             </Tooltip>
@@ -182,7 +175,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Dividend yield</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : mockData.dividendYield}
+                  {isStealthMode ? "••••" : "—"}
                 </div>
               </div>
             </Tooltip>
