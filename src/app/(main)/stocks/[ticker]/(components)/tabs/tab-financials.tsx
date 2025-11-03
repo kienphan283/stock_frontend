@@ -333,7 +333,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                   >
-                    <td className={`py-3 px-6 text-gray-700 dark:text-gray-300 sticky left-0 relative transition-colors ${getLineCellBg()} ${getLineCellHoverBg()}`}>
+                    <td className={`py-3 px-6 text-gray-700 dark:text-gray-300 sticky left-0 transition-colors ${getLineCellBg()} ${getLineCellHoverBg()}`}>
                       <div className="relative flex items-center gap-2">
                         <div
                           className="w-1 h-6 rounded-full transition-all"

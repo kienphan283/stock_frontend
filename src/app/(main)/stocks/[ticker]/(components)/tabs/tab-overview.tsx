@@ -1,80 +1,90 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { useStealthMode } from "@/contexts/StealthContext";
 import type { Stock } from "@/types";
 import PromotionalBanner from "@/components/ui/PromotionalBanner";
 import CompanyInfo from "@/components/shared/CompanyInfo";
-import { PriceHistoryChart, type PriceDataPoint } from "@/components/charts";
+import { PriceHistoryChart, type PriceDataPoint, type ChartType } from "@/components/charts";
+import PeriodSelector from "../PeriodSelector";
 
 interface OverviewTabProps {
   stock: Stock;
 }
 
+// API Base URL - Uses Express.js proxy in production, FastAPI directly in dev
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 export default function OverviewTab({ stock }: OverviewTabProps) {
   const { formatPrice, formatNumber, isStealthMode } = useStealthMode();
-  const [selectedPeriod, setSelectedPeriod] = useState("1y");
+  const [selectedPeriod, setSelectedPeriod] = useState("1m");
+  const [priceHistoryData, setPriceHistoryData] = useState<PriceDataPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [chartType, setChartType] = useState<ChartType>("line");
 
-  // ==========================================
-  // MOCK DATA - Thiết kế sẵn sàng để replace bằng real data từ API
-  // TODO: Fetch từ API: GET /api/stocks/{ticker}/price-history?period={selectedPeriod}
-  // ==========================================
-  const mockPriceHistoryData: Record<string, PriceDataPoint[]> = {
-    "7d": [
-      { date: "2025-10-18", price: 245.27 },
-      { date: "2025-10-19", price: 247.50 },
-      { date: "2025-10-20", price: 243.80 },
-      { date: "2025-10-21", price: 249.20 },
-      { date: "2025-10-22", price: 251.30 },
-      { date: "2025-10-23", price: 248.90 },
-      { date: "2025-10-24", price: 254.04 },
-    ],
-    "1m": Array.from({ length: 30 }, (_, i) => ({
-      date: new Date(2025, 9, i + 1).toISOString().split('T')[0],
-      price: 220 + Math.random() * 40,
-    })),
-    "3m": Array.from({ length: 90 }, (_, i) => ({
-      date: new Date(2025, 7, i + 1).toISOString().split('T')[0],
-      price: 200 + Math.random() * 60,
-    })),
-    "6m": Array.from({ length: 180 }, (_, i) => ({
-      date: new Date(2025, 4, i + 1).toISOString().split('T')[0],
-      price: 190 + Math.random() * 70,
-    })),
-    "YTD": Array.from({ length: 300 }, (_, i) => ({
-      date: new Date(2025, 0, i + 1).toISOString().split('T')[0],
-      price: 180 + Math.random() * 80,
-    })),
-    "1y": [
-      { date: "Nov '24", price: 180.00 },
-      { date: "Dec '24", price: 195.50 },
-      { date: "Jan '25", price: 188.30 },
-      { date: "Feb '25", price: 172.40 },
-      { date: "Mar '25", price: 158.20 },
-      { date: "Apr '25", price: 189.50 },
-      { date: "May '25", price: 215.80 },
-      { date: "Jun '25", price: 238.40 },
-      { date: "Jul '25", price: 245.60 },
-      { date: "Aug '25", price: 232.30 },
-      { date: "Sep '25", price: 218.90 },
-      { date: "Oct '25", price: 245.27 },
-    ],
-    "5y": Array.from({ length: 60 }, (_, i) => ({
-      date: new Date(2020, i, 1).toISOString().split('T')[0],
-      price: 100 + Math.random() * 160,
-    })),
-    "all": Array.from({ length: 120 }, (_, i) => ({
-      date: new Date(2015, i, 1).toISOString().split('T')[0],
-      price: 50 + Math.random() * 210,
-    })),
-  };
+  // Fetch real price data from API
+  useEffect(() => {
+    const fetchPriceHistory = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  // Get price history data dựa trên selected period
-  const priceHistoryData = useMemo(
-    () => mockPriceHistoryData[selectedPeriod] || mockPriceHistoryData["1y"],
-    [selectedPeriod]
-  );
+      try {
+        // Map frontend period labels to API period values
+        const periodMap: Record<string, string> = {
+          "1d": "1d",
+          "5d": "5d",
+          "1m": "1m",
+          "3m": "3m",
+          "6m": "6m",
+          "ytd": "ytd",
+          "1y": "1y",
+          "5y": "5y",
+          "max": "max",
+        };
+
+        const apiPeriod = periodMap[selectedPeriod] || "1m";
+        const url = `${API_BASE_URL}/api/stocks/${stock.ticker}/price-history?period=${apiPeriod}`;
+
+        console.log(`[OverviewTab] Fetching price history: ${url}`);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch price history: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.data) {
+          throw new Error("Invalid API response format");
+        }
+
+        // Transform API data to PriceDataPoint format with OHLC
+        const transformedData: PriceDataPoint[] = result.data.map((item: any) => ({
+          date: item.date,
+          price: item.close, // Use closing price for line chart
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+        }));
+
+        setPriceHistoryData(transformedData);
+        console.log(`[OverviewTab] Loaded ${transformedData.length} price records for period ${selectedPeriod}`);
+        console.log(`[OverviewTab] Date range: ${transformedData[0]?.date} to ${transformedData[transformedData.length - 1]?.date}`);
+      } catch (err) {
+        console.error("[OverviewTab] Error fetching price history:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+        setPriceHistoryData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPriceHistory();
+  }, [stock.ticker, selectedPeriod]);
 
   // Tính toán performance metrics
   const performanceMetrics = useMemo(() => {
@@ -147,6 +157,56 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                   Price history
                 </h3>
                 <div className="flex items-center gap-4">
+                  {/* Chart Type Toggle */}
+                  <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                    <button
+                      onClick={() => setChartType("line")}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        chartType === "line"
+                          ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                      }`}
+                      title="Line Chart"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setChartType("candlestick")}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        chartType === "candlestick"
+                          ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                      }`}
+                      title="Candlestick Chart"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 3v4m0 4v10m6-18v10m0 4v4M6 13h6m0 0h6"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
                   <div className="flex items-center gap-2">
                     <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">
                       Price ($)
@@ -183,64 +243,61 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                 </div>
               </div>
 
-              {/* Time Period Buttons & Performance Indicator */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {["7d", "1m", "3m", "6m", "YTD", "1y", "5y", "all"].map(
-                    (period) => (
-                      <button
-                        key={period}
-                        onClick={() => setSelectedPeriod(period)}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${selectedPeriod === period
-                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
-                          }`}
-                      >
-                        {period}
-                      </button>
-                    )
-                  )}
-                  <button className="px-2 py-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md ml-1">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Performance indicator */}
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">
-                    {isStealthMode ? "•••• - ••••" : performanceMetrics.dateRange}
-                  </span>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span
-                    className={`font-semibold ${performanceMetrics.change >= 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                      }`}
-                  >
-                    {isStealthMode
-                      ? "••••"
-                      : `${performanceMetrics.change >= 0 ? "+" : ""}$${performanceMetrics.change.toFixed(2)} (${performanceMetrics.change >= 0 ? "▲" : "▼"} ${Math.abs(performanceMetrics.changePercent).toFixed(2)}%)`}
-                  </span>
-                </div>
-              </div>
-
               {/* Chart Container - Sử dụng PriceHistoryChart component */}
               <div className="relative min-h-[450px]">
-                <PriceHistoryChart
-                  data={priceHistoryData}
-                  height={450}
-                  isStealthMode={isStealthMode}
-                  showMinMax={true}
-                  color="#3B82F6"
-                />
+                {isLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Loading chart data...
+                      </span>
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-red-50 dark:bg-red-900/10 rounded-lg">
+                    <div className="text-center px-4">
+                      <svg
+                        className="w-12 h-12 text-red-500 dark:text-red-400 mx-auto mb-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">
+                        Failed to load chart data
+                      </p>
+                      <p className="text-xs text-red-500 dark:text-red-300">
+                        {error}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <PriceHistoryChart
+                    data={priceHistoryData}
+                    height={450}
+                    isStealthMode={isStealthMode}
+                    showMinMax={true}
+                    color="#3B82F6"
+                    period={selectedPeriod}
+                    chartType={chartType}
+                  />
+                )}
               </div>
+
+              {/* Period Selector with % changes - Below Chart */}
+              <PeriodSelector
+                ticker={stock.ticker}
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                currentPrice={priceHistoryData[priceHistoryData.length - 1]?.price || 0}
+              />
             </Card>
           </div>
 
