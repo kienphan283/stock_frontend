@@ -246,6 +246,45 @@ export const companiesData: Record<string, CompanyData> = {
             },
         ],
     },
+    IBM: {
+        ticker: "IBM",
+        name: "International Business Machines Corporation",
+        description:
+            "IBM is a multinational technology company offering a comprehensive portfolio of enterprise solutions including cloud computing, artificial intelligence, quantum computing, and business consulting services. The company has transformed from a hardware manufacturer to a hybrid cloud and AI-focused enterprise, with its Red Hat acquisition strengthening its position in the cloud infrastructure market.",
+        logo: "/logos/ibm.png",
+        sector: "Technology",
+        industry: "Information Technology Services",
+        founded: "1911",
+        headquarters: "Armonk, New York, USA",
+        website: "https://www.ibm.com",
+        faqs: [
+            {
+                question: "What are IBM's main business segments?",
+                answer:
+                    "IBM operates through Software (including Red Hat), Consulting, Infrastructure (hybrid cloud and IT infrastructure), and Financing segments. The company focuses on hybrid cloud and AI solutions for enterprise clients.",
+            },
+            {
+                question: "What is IBM's Red Hat acquisition?",
+                answer:
+                    "In 2019, IBM acquired Red Hat for $34 billion, making it IBM's largest acquisition. Red Hat's open-source enterprise software, especially Red Hat OpenShift, is central to IBM's hybrid cloud strategy.",
+            },
+            {
+                question: "Does IBM pay dividends?",
+                answer:
+                    "Yes, IBM has a long history of paying dividends and is known as a dividend aristocrat, having increased its dividend for many consecutive years. The company typically offers an attractive dividend yield.",
+            },
+            {
+                question: "What is IBM Watson?",
+                answer:
+                    "IBM Watson is the company's AI platform offering natural language processing, machine learning, and data analytics capabilities. It's used across industries for applications like healthcare diagnostics, customer service automation, and business intelligence.",
+            },
+            {
+                question: "What is IBM's quantum computing initiative?",
+                answer:
+                    "IBM is a leader in quantum computing research and development. The company offers cloud-based access to quantum computers through IBM Quantum Experience and is developing practical quantum applications for optimization, cryptography, and scientific research.",
+            },
+        ],
+    },
 };
 
 /**
