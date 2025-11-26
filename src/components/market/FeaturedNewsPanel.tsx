@@ -146,11 +146,11 @@ export default function FeaturedNewsPanel() {
   };
 
   return (
-    <div className="bg-[#2a2d3a] rounded-lg shadow-lg h-full overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-[#2a2d3a] rounded-lg shadow-lg h-full overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
-        <h2 className="text-base font-semibold text-gray-100">Bài nổi bật</h2>
-        <button className="text-gray-400 hover:text-gray-200 transition-colors">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Bài nổi bật</h2>
+        <button className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -163,25 +163,25 @@ export default function FeaturedNewsPanel() {
         <div className="space-y-2 p-2">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="flex gap-2 animate-pulse">
-              <div className="w-20 h-16 bg-gray-700 rounded" />
+              <div className="w-20 h-16 bg-gray-300 dark:bg-gray-700 rounded" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 bg-gray-700 rounded w-full" />
-                <div className="h-3 bg-gray-700 rounded w-3/4" />
-                <div className="h-2 bg-gray-700 rounded w-1/2" />
+                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-full" />
+                <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-3/4" />
+                <div className="h-2 bg-gray-300 dark:bg-gray-700 rounded w-1/2" />
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto px-2 py-1 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto px-2 py-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
           {news.map((article) => (
             <div
               key={article.id}
-              className="group cursor-pointer hover:bg-gray-800/30 rounded p-2 transition-colors mb-2"
+              className="group cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/30 rounded p-2 transition-colors mb-2"
             >
               <div className="flex gap-2">
                 {/* Thumbnail */}
-                <div className="relative w-20 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-800">
+                <div className="relative w-20 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-200 dark:bg-gray-800">
                   <Image
                     src={article.thumbnail}
                     alt={article.title}
@@ -228,19 +228,19 @@ export default function FeaturedNewsPanel() {
                   )}
 
                   {/* Title */}
-                  <h3 className="text-xs text-gray-200 font-normal line-clamp-2 group-hover:text-blue-400 transition-colors mb-1">
+                  <h3 className="text-xs text-gray-800 dark:text-gray-200 font-normal line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
                     {article.title}
                   </h3>
 
                   {/* Meta info */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-500">
+                    <span className="text-[10px] text-gray-500 dark:text-gray-500">
                       {mounted ? formatTimeAgo(article.publishedAt) : '...'}
                     </span>
 
                     {/* Reactions */}
                     {article.reactions && (
-                      <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                      <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-500">
                         <span className="flex items-center gap-0.5">
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
