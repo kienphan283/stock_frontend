@@ -9,9 +9,7 @@ export interface NavLink {
 export const mainNav: NavLink[] = [
   {
     href: "/market",
-    label: "Market",
-    icon: "📊",
-    description: "Market Overview Dashboard",
+    label: "Dashboard",
   },
   {
     href: "/stocks",

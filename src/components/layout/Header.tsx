@@ -21,9 +21,8 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1"
+                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
-                {item.icon && <span>{item.icon}</span>}
                 {item.label}
               </Link>
             ))}
