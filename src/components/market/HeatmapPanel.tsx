@@ -38,8 +38,8 @@ export default function HeatmapPanel() {
         </div>
       </div>
 
-      {/* Heatmap Area - Increased size with FireAnt-style container */}
-      <div className="flex-1 p-4 overflow-hidden flex items-center justify-center">
+      {/* Heatmap Area - Expanded to 520-600px height, no scrollbars */}
+      <div className="flex-1 p-3 overflow-visible flex items-center justify-center min-h-0">
         {isLoading ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center">
@@ -61,13 +61,15 @@ export default function HeatmapPanel() {
           </div>
         ) : heatmapData ? (
           <div
-            className="w-full h-full max-h-[550px] min-h-[450px] rounded-md border border-white/8 dark:border-white/8 p-3 bg-transparent"
+            className="w-full h-full rounded-md border border-white/8 dark:border-white/8 p-2 bg-transparent"
             style={{
               borderRadius: "6px",
               border: "1px solid rgba(255, 255, 255, 0.08)",
+              minHeight: "520px",
+              maxHeight: "600px",
             }}
           >
-            <HeatmapChart data={heatmapData} height={520} />
+            <HeatmapChart data={heatmapData} height={undefined} />
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-500">

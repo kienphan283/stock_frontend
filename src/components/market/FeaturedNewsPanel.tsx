@@ -148,7 +148,7 @@ export default function FeaturedNewsPanel() {
   return (
     <div className="bg-white dark:bg-[#2a2d3a] rounded-lg shadow-lg h-full overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Bài nổi bật</h2>
         <button className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@ export default function FeaturedNewsPanel() {
         </button>
       </div>
 
-      {/* News List */}
+      {/* News List - Internal scroll only */}
       {loading && news.length === 0 ? (
         // Loading skeleton
         <div className="space-y-2 p-2">
@@ -173,7 +173,7 @@ export default function FeaturedNewsPanel() {
           ))}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto px-2 py-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto px-2 py-1 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
           {news.map((article) => (
             <div
               key={article.id}

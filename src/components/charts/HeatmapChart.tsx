@@ -61,7 +61,7 @@ export default function HeatmapChart({
     const { x, y, width, height, name, fullName, changePercent, price, value, depth } =
       props;
 
-    // Render parent cells (sectors) with FireAnt-style title bar overlay
+    // Render parent cells (sectors) with FireAnt-style sector title
     // This renders at depth === 1, which is the sector level in the hierarchical Treemap
     if (depth === 1) {
       // Sector container styling
@@ -69,23 +69,15 @@ export default function HeatmapChart({
       const sectorBorderColor = "#4b5563"; // Visible border color (gray-600)
       const sectorBorderWidth = 2; // Visible border width
 
-      // FireAnt-style title bar styling
-      // Title bar appears at top-left of sector block, does not overlap stock tiles
-      const titleBarBg = "rgba(0, 0, 0, 0.35)"; // Dark translucent background
-      const titleBarPaddingX = 6; // Horizontal padding
-      const titleBarPaddingY = 3; // Vertical padding
-      const titleBarFontSize = 11; // Font size as specified
-      const titleBarFontWeight = 600; // Font weight as specified
-      const titleBarBorderRadius = 3; // Border radius as specified
-      const titleBarTextColor = "#ffffff"; // White text for contrast
-      const titleBarOffsetX = 4; // Offset from left edge of sector
-      const titleBarOffsetY = 4; // Offset from top edge of sector
-
-      // Calculate title bar dimensions based on text
-      // Approximate text width: font-size * character-count * 0.6 (average character width factor)
-      const estimatedTextWidth = name.length * titleBarFontSize * 0.6;
-      const titleBarWidth = estimatedTextWidth + titleBarPaddingX * 2;
-      const titleBarHeight = titleBarFontSize + titleBarPaddingY * 2;
+      // FireAnt-style sector title styling (text only, no background box)
+      const titleFontSize = 11; // Font size
+      const titleFontWeight = 600; // Font weight as specified
+      const titleTextColor = "#d0d3d8"; // Light gray color as specified
+      const titlePaddingLeft = 7; // Padding-left: 6-8px (using 7px)
+      const titleOffsetY = 18; // Reserve ~18-22px height at top (using 18px)
+      
+      // Convert sector name to uppercase for FireAnt-style display
+      const sectorTitle = name ? name.toUpperCase() : "";
 
       return (
         <g>
@@ -104,41 +96,23 @@ export default function HeatmapChart({
             rx={2} // Slight rounded corners
             ry={2}
           />
-          {/* FireAnt-style sector title bar overlay at top-left */}
-          {/* This overlay sits on top of the sector container but does not interfere with stock tiles */}
-          {/* pointer-events: none ensures it doesn't block tooltips or interactions */}
-          {name && width > 20 && height > 15 && (
-            <g>
-              {/* Title bar background - dark translucent rectangle */}
-              <rect
-                x={x + titleBarOffsetX}
-                y={y + titleBarOffsetY}
-                width={Math.min(titleBarWidth, width - titleBarOffsetX * 2)}
-                height={titleBarHeight}
-                rx={titleBarBorderRadius}
-                ry={titleBarBorderRadius}
-                style={{
-                  fill: titleBarBg,
-                  pointerEvents: "none", // Don't block interactions with stock tiles
-                }}
-              />
-              {/* Sector name text - white text on dark translucent background */}
-              {/* Y position calculated to center text vertically in title bar: offset + padding + font-size baseline offset */}
-              <text
-                x={x + titleBarOffsetX + titleBarPaddingX}
-                y={y + titleBarOffsetY + titleBarPaddingY + titleBarFontSize * 0.8}
-                textAnchor="start"
-                fill={titleBarTextColor}
-                fontSize={titleBarFontSize}
-                fontWeight={titleBarFontWeight}
-                style={{
-                  pointerEvents: "none", // Don't block interactions
-                  userSelect: "none", // Prevent text selection
-                }}
-              >
-                {name}
-              </text>
-            </g>
+          {/* FireAnt-style sector title - text only, no background box */}
+          {/* Positioned at top-left inside sector rectangle, reserves space to prevent overlap with child tiles */}
+          {sectorTitle && width > 20 && height > titleOffsetY && (
+            <text
+              x={x + titlePaddingLeft}
+              y={y + titleOffsetY}
+              textAnchor="start"
+              fill={titleTextColor}
+              fontSize={titleFontSize}
+              fontWeight={titleFontWeight}
+              style={{
+                pointerEvents: "none", // Don't block interactions with stock tiles
+                userSelect: "none", // Prevent text selection
+              }}
+            >
+              {sectorTitle}
+            </text>
           )}
         </g>
       );
