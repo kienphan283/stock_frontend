@@ -70,19 +70,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     };
 
     const handler = (trade: any) => {
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[RealtimeContext] Received trade_update:", trade);
-      }
-      
       // Skip invalid trade payloads
       if (!isValidTrade(trade)) {
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.warn("[RealtimeContext] Invalid trade payload received:", trade);
-        }
         return;
       }
 
@@ -102,11 +91,6 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
           type: "trade",
         };
         next.set(normalizedSymbol, normalizedTrade);
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log("[RealtimeContext] Updated trades map, size:", next.size, "symbol:", normalizedSymbol);
-        }
         return next;
       });
       
@@ -117,11 +101,6 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     // Define connection handler at function scope so it's accessible in cleanup
     const onConnect = () => {
       setIsConnected(true);
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[RealtimeContext] Socket connected, binding trade_update handler");
-      }
       socket.on("trade_update", handler);
     };
 
@@ -132,11 +111,6 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     // Re-bind handler on reconnect to ensure it's still active
     const onReconnect = () => {
       setIsConnected(true);
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[RealtimeContext] Socket reconnected, re-binding trade_update handler");
-      }
       // Re-bind handler để đảm bảo luôn active
       socket.off("trade_update", handler); // Remove old handler trước
       socket.on("trade_update", handler); // Bind lại
@@ -150,19 +124,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     // Ensure socket is connected before adding listener
     if (socket.connected) {
       setIsConnected(true);
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[RealtimeContext] Socket already connected, binding trade_update handler");
-      }
       socket.on("trade_update", handler);
     } else {
       setIsConnected(false);
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[RealtimeContext] Socket not connected, waiting for connect event");
-      }
     }
 
     return () => {

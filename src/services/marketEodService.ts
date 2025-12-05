@@ -44,7 +44,6 @@ export async function fetchLatestEodBatch(
 
     return result.data;
   } catch (error) {
-    console.error("[marketEodService] Error fetching latest EOD data:", error);
     throw error;
   }
 }

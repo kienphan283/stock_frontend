@@ -58,7 +58,7 @@ export default function MarketStatusPanel() {
       const data = await marketService.getMarketStatus();
       setStatus(data);
     } catch (error) {
-      console.error("Failed to load market status:", error);
+      setStatus(null);
     } finally {
       setIsLoading(false);
     }

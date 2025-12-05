@@ -175,7 +175,12 @@ export default function FeaturedNewsPanel({ heatmapData }: FeaturedNewsPanelProp
         } catch (err) {
           // Fallback to popular tickers if fetch fails
           if (process.env.NODE_ENV === 'development') {
-            console.warn('[FeaturedNewsPanel] Failed to fetch market stocks, using popular tickers');
+            if (process.env.NODE_ENV === "development") {
+              // eslint-disable-next-line no-console
+              console.warn(
+                "[FeaturedNewsPanel] Failed to fetch market stocks, using popular tickers"
+              );
+            }
           }
         }
         

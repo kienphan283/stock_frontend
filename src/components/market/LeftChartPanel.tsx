@@ -25,6 +25,8 @@ import {
 } from "recharts";
 import { useRealtimeHeatmap } from "@/hooks/useRealtimeHeatmap";
 import { formatMoneyFlow } from "@/utils/format";
+import { getRadialGradientStops } from "@/utils/gradients";
+import { deriveHeatmapStatus } from "@/utils/heatmapSelectors";
 
 
 // Colors aligned with heatmap palette (see utils/colorUtils.ts)
@@ -46,48 +48,7 @@ const LeftChartPanel = React.memo(function LeftChartPanel({ heatmapData }: LeftC
   const { data, isLoading, error } = heatmapData;
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const derivedStatus = useMemo(() => {
-    if (!data || !data.sectors || !Array.isArray(data.sectors)) return null;
-
-    const allStocks = data.sectors.flatMap((s) => s.stocks);
-    if (allStocks.length === 0) return null;
-
-    let advancing = 0;
-    let declining = 0;
-    let unchanged = 0;
-
-    let flowAdvancing = 0;
-    let flowDeclining = 0;
-    let flowUnchanged = 0;
-
-    allStocks.forEach((stock) => {
-      const cp = stock.changePercent ?? 0;
-      // approximate cash flow = price * volume (in USD, not scaled)
-      const cashFlow = (stock.price ?? 0) * (stock.volume ?? 0);
-
-      if (cp > 0) {
-        advancing += 1;
-        flowAdvancing += cashFlow;
-      } else if (cp < 0) {
-        declining += 1;
-        flowDeclining += cashFlow;
-      } else {
-        unchanged += 1;
-        flowUnchanged += cashFlow;
-      }
-    });
-
-    return {
-      advancing,
-      declining,
-      unchanged,
-      cashFlow: {
-        advancing: flowAdvancing,
-        declining: flowDeclining,
-        unchanged: flowUnchanged,
-      },
-    };
-  }, [data]);
+  const derivedStatus = useMemo(() => deriveHeatmapStatus(data), [data]);
 
   if (isLoading || !derivedStatus || error) {
     return (
@@ -166,23 +127,8 @@ const LeftChartPanel = React.memo(function LeftChartPanel({ heatmapData }: LeftC
               <defs>
                 {/* Radial gradient for each slice to create 3D depth when hovered */}
                 {pieData.map((entry, index) => {
-                  // Create gradient based on original color to maintain color consistency
                   const baseColor = entry.color;
-                  // Create a slightly lighter version for highlight effect (center of gradient)
-                  // Convert hex to RGB, lighten it
-                  const hexToRgb = (hex: string) => {
-                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                    return result ? {
-                      r: parseInt(result[1], 16),
-                      g: parseInt(result[2], 16),
-                      b: parseInt(result[3], 16)
-                    } : null;
-                  };
-                  const rgb = hexToRgb(baseColor);
-                  // Lighten color for center highlight (add 40 to each RGB component)
-                  const lighterColor = rgb 
-                    ? `rgb(${Math.min(255, rgb.r + 40)}, ${Math.min(255, rgb.g + 40)}, ${Math.min(255, rgb.b + 40)})`
-                    : baseColor;
+                  const { lighterColor } = getRadialGradientStops(baseColor);
                   
                   return (
                     <radialGradient key={`gradient-${index}`} id={`pieGradient-${index}`} cx="30%" cy="30%">

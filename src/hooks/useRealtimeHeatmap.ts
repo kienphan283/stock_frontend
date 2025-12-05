@@ -33,44 +33,13 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
   // ✅ Step 6: Optimize Re-renders - Memoize expensive calculations
   // Kiểm tra xem có realtime data không (WS connected và có trade trong 30 giây)
   const hasActiveRealtimeData = useMemo(() => {
-    const result = (() => {
-      if (!isConnected) {
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log("[useRealtimeHeatmap] hasActiveRealtimeData: false (not connected)");
-        }
-        return false;
-      }
-      if (latestTrades.size === 0) {
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log("[useRealtimeHeatmap] hasActiveRealtimeData: false (no trades)");
-        }
-        return false;
-      }
-      if (!lastTradeTimestamp) {
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log("[useRealtimeHeatmap] hasActiveRealtimeData: false (no timestamp)");
-        }
-        return false;
-      }
-      
-      const timeSinceLastTrade = Date.now() - lastTradeTimestamp;
-      const REALTIME_TIMEOUT_MS = 30 * 1000; // 30 giây
-      const isActive = timeSinceLastTrade < REALTIME_TIMEOUT_MS;
-      
-      // ✅ Step 4: Dev-only logging
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log("[useRealtimeHeatmap] hasActiveRealtimeData:", isActive, "timeSinceLastTrade:", timeSinceLastTrade, "ms");
-      }
-      return isActive;
-    })();
-    return result;
+    if (!isConnected) return false;
+    if (latestTrades.size === 0) return false;
+    if (!lastTradeTimestamp) return false;
+    
+    const timeSinceLastTrade = Date.now() - lastTradeTimestamp;
+    const REALTIME_TIMEOUT_MS = 30 * 1000; // 30 giây
+    return timeSinceLastTrade < REALTIME_TIMEOUT_MS;
   }, [isConnected, latestTrades.size, lastTradeTimestamp]);
   
   // ✅ Step 2: Optimize Volume Polling - Debounce and increase interval to 5s, only poll when WebSocket connected
@@ -95,18 +64,8 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
     fetchAccumulatedVolumes(symbols)
       .then((volumes) => {
         setDbVolumes(volumes);
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log("[useRealtimeHeatmap] ✅ Fetched volumes from DB:", Object.keys(volumes).length, "symbols");
-        }
       })
       .catch((err) => {
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.warn("[useRealtimeHeatmap] Failed to fetch volumes from DB:", err);
-        }
         // Don't set error state, just log - volumes will fall back to snapshot volume
       });
     
@@ -119,12 +78,8 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
         .then((volumes) => {
           setDbVolumes(volumes);
         })
-        .catch((err) => {
-          // ✅ Step 4: Dev-only logging
-          if (process.env.NODE_ENV === 'development') {
-            // eslint-disable-next-line no-console
-            console.warn("[useRealtimeHeatmap] Failed to fetch volumes from DB (polling):", err);
-          }
+        .catch(() => {
+          // swallow polling errors; volumes will retry on next interval
         });
     }, VOLUME_POLL_INTERVAL_MS);
     
@@ -151,12 +106,6 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
             initialDelay: 200, // Giảm delay ban đầu
             maxDelay: 2000, // Giảm max delay
             backoffMultiplier: 2,
-            onRetry: (attempt) => {
-              // eslint-disable-next-line no-console
-              console.warn(
-                `[useRealtimeHeatmap] Retry attempt ${attempt}/2 for fetchMarketStocks`
-              );
-            },
           }
         );
 
@@ -227,19 +176,9 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
         const marketOpen = isMarketOpen();
         if (!marketOpen) {
           // Market đóng → fetch latest EOD data của phiên vừa kết thúc
-          if (process.env.NODE_ENV === 'development') {
-            // eslint-disable-next-line no-console
-            console.log("[useRealtimeHeatmap] Market is closed, fetching latest EOD data...");
-          }
-          
           fetchLatestEodBatch(symbols)
             .then((eodData) => {
               if (!isMounted) return;
-              
-              if (process.env.NODE_ENV === 'development') {
-                // eslint-disable-next-line no-console
-                console.log(`[useRealtimeHeatmap] ✅ Fetched latest EOD data for ${Object.keys(eodData).length} symbols`);
-              }
               
               // Update data với EOD values
               setData((prev) => {
@@ -286,25 +225,13 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
                 };
               });
             })
-            .catch((err) => {
-              if (process.env.NODE_ENV === 'development') {
-                // eslint-disable-next-line no-console
-                console.warn("[useRealtimeHeatmap] Failed to fetch latest EOD data:", err);
-              }
-            });
+            .catch(() => {});
         }
         
         // Fetch previousClose để dùng cho realtime data (khi market mở)
         fetchPreviousClosesBatch(symbols)
           .then((previousCloses) => {
             if (!isMounted) return;
-            // ✅ Step 4: Dev-only logging
-            if (process.env.NODE_ENV === 'development') {
-              // eslint-disable-next-line no-console
-              console.log(
-                `[useRealtimeHeatmap] ✅ Fetched previousClose from EOD (batch) for ${Object.keys(previousCloses).length} symbols`
-              );
-            }
             // Update previousClose cho từng stock
             setData((prev) => {
               if (!prev) return prev;
@@ -321,15 +248,7 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
               };
             });
           })
-          .catch((err) => {
-            // ✅ Step 4: Dev-only logging
-            if (process.env.NODE_ENV === 'development') {
-              // eslint-disable-next-line no-console
-              console.warn(
-                "[useRealtimeHeatmap] Failed to fetch previousClose from EOD, will use first trade price as baseline",
-                err
-              );
-            }
+          .catch(() => {
             // Không set error, chỉ log warning - UI vẫn hoạt động bình thường
           });
       } catch (error) {
@@ -337,11 +256,6 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
           error instanceof Error
             ? error.message
             : "Failed to load stock metadata";
-        // ✅ Step 4: Dev-only logging
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.error("[useRealtimeHeatmap] Failed to load metadata:", error);
-        }
         if (isMounted) {
           setError(errorMessage);
           setData({
@@ -515,10 +429,6 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
         totalStocks: updatedSectors.reduce((sum, s) => sum + s.stocks.length, 0),
         lastUpdate: new Date().toISOString(),
       };
-
-      // Giảm logging để tăng performance
-      // eslint-disable-next-line no-console
-      // console.log("[useRealtimeHeatmap] ✅ Created new heatmap data with", tradesMap.size, "trade updates");
 
       return newData;
     });

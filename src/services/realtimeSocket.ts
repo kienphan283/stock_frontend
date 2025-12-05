@@ -24,7 +24,7 @@ export const socket: Socket = io(WS_URL, {
 });
 
 // ✅ Step 4: Dev-only logging
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   socket.on("connect", () => {
     // eslint-disable-next-line no-console
     console.log("[Socket.IO] Connected to realtime server");
