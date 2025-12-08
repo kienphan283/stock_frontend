@@ -542,7 +542,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
               {groupedData.groups.map((group, groupIndex) => (
                 <Fragment key={groupIndex}>
                   {/* Group Title */}
-                  {group.title && (
+                  {(group as any).title && (
                     <tr className="bg-gray-100 dark:bg-gray-700">
                       <td colSpan={groupedData.periods.length + 1} className="py-2 px-6 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
                         {group.title}
