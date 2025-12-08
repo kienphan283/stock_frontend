@@ -37,6 +37,10 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
             stockData.price = quote.currentPrice;
             stockData.change = quote.change;
             stockData.changePercent = quote.percentChange;
+            // Map P/E and EPS if available in quote (real-time updates)
+            if (quote.pe) stockData.pe = quote.pe;
+            if (quote.eps) stockData.eps = quote.eps;
+
             // Map legacy fields for compatibility
             stockData.priceChange = quote.change;
             stockData.priceChangePercent = quote.percentChange;
