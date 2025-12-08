@@ -30,14 +30,19 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
         setTicker(resolvedParams.ticker);
         const stockData = await stockService.getStock(resolvedParams.ticker);
 
-        // Fetch price change data from database
+        // Fetch real-time quote for price and changes
         try {
-          const priceChangeData = await stockService.getPriceChange(resolvedParams.ticker);
-          stockData.priceChange = priceChangeData.absoluteChange;
-          stockData.priceChangePercent = priceChangeData.percentageChange;
-        } catch (priceErr) {
-          console.warn("Could not fetch price change data:", priceErr);
-          // Continue without price change data (fallback to defaults)
+          const quote = await stockService.getQuote(resolvedParams.ticker);
+          if (quote) {
+            stockData.price = quote.currentPrice;
+            stockData.change = quote.change;
+            stockData.changePercent = quote.percentChange;
+            // Map legacy fields for compatibility
+            stockData.priceChange = quote.change;
+            stockData.priceChangePercent = quote.percentChange;
+          }
+        } catch (quoteErr) {
+          console.warn("Could not fetch quote:", quoteErr);
         }
 
         setStock(stockData);

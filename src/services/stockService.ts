@@ -96,4 +96,11 @@ export const stockService = {
     }
     return response.json();
   },
+
+  /**
+   * Get real-time quote for a stock
+   */
+  async getQuote(ticker: string): Promise<any> {
+    return apiRequest<any>(`/api/stocks/${ticker}/quote`);
+  },
 };

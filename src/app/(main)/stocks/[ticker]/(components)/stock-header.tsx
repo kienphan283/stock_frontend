@@ -123,7 +123,16 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Earnings date</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : stock.latestQuarter ? new Date(stock.latestQuarter).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "—"}
+                  {isStealthMode ? "••••" : (() => {
+                    if (!stock.latestQuarter) return "—";
+                    // If it matches YYYYQq format (e.g., 2024Q3), display as is
+                    if (/^\d{4}Q\d$/.test(stock.latestQuarter)) return stock.latestQuarter;
+                    // Otherwise try to parse as date
+                    const date = new Date(stock.latestQuarter);
+                    return !isNaN(date.getTime())
+                      ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : stock.latestQuarter;
+                  })()}
                 </div>
               </div>
             </Tooltip>
@@ -162,7 +171,14 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Market cap</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : stock.marketCap ? `$${(stock.marketCap / 1e12).toFixed(2)}T` : "—"}
+                  {isStealthMode ? "••••" : (() => {
+                    if (!stock.marketCap) return "—";
+                    const val = stock.marketCap;
+                    if (val >= 1e12) return `$${(val / 1e12).toFixed(2)}T`;
+                    if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
+                    if (val >= 1e6) return `$${(val / 1e6).toFixed(2)}M`;
+                    return `$${val.toLocaleString()}`;
+                  })()}
                 </div>
               </div>
             </Tooltip>
@@ -175,7 +191,7 @@ export default function StockHeader({
               <div>
                 <div className="text-gray-500 dark:text-gray-400 mb-1 text-xs">Dividend yield</div>
                 <div className="font-medium text-gray-900 dark:text-white text-sm">
-                  {isStealthMode ? "••••" : stock.dividendYield ? `${stock.dividendYield}%` : "—"}
+                  {isStealthMode ? "••••" : stock.dividendYield !== undefined && stock.dividendYield !== null ? `${stock.dividendYield.toFixed(2)}%` : "—"}
                 </div>
               </div>
             </Tooltip>
