@@ -21,7 +21,7 @@ interface PeriodSelectorProps {
   currentPrice: number;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function PeriodSelector({
   ticker,
@@ -47,19 +47,19 @@ export default function PeriodSelector({
           try {
             // Map "ytd" to API period
             const apiPeriod = periodData.period;
-            
+
             const url = `${API_BASE_URL}/api/stocks/${ticker}/price-history?period=${apiPeriod}`;
             console.log(`[PeriodSelector] Fetching ${periodData.period}:`, url);
-            
+
             const response = await fetch(url);
-            
+
             if (!response.ok) {
               console.error(`[PeriodSelector] Failed to fetch ${periodData.period}:`, response.statusText);
               return { ...periodData, changePercent: null, isLoading: false };
             }
 
             const result = await response.json();
-            
+
             if (!result.success || !result.data || result.data.length < 2) {
               console.warn(`[PeriodSelector] No data for ${periodData.period}, data length:`, result.data?.length);
               return { ...periodData, changePercent: null, isLoading: false };
@@ -105,7 +105,7 @@ export default function PeriodSelector({
     <div className="flex items-center justify-center gap-2 flex-wrap py-4 border-t border-gray-200 dark:border-gray-700">
       {periodsData.map((periodData) => {
         const isSelected = selectedPeriod === periodData.period;
-        
+
         return (
           <button
             key={periodData.period}
@@ -113,19 +113,17 @@ export default function PeriodSelector({
             disabled={periodData.isLoading}
             className={`
               flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all
-              ${
-                isSelected
-                  ? "bg-gray-100 dark:bg-gray-800 shadow-sm"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              ${isSelected
+                ? "bg-gray-100 dark:bg-gray-800 shadow-sm"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
               }
               ${periodData.isLoading ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
-            <span className={`text-sm font-medium ${
-              isSelected 
-                ? "text-gray-900 dark:text-white" 
+            <span className={`text-sm font-medium ${isSelected
+                ? "text-gray-900 dark:text-white"
                 : "text-gray-600 dark:text-gray-400"
-            }`}>
+              }`}>
               {periodData.label}
             </span>
             <span className={`text-xs font-semibold ${getPercentColor(periodData.changePercent)}`}>
