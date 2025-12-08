@@ -1,69 +1,140 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useStealthMode } from "@/contexts/StealthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { mainNav, toolsNav, type NavLink } from "@/config/navigation";
+import { stockService } from "@/services/stockService";
+import type { Stock } from "@/types";
 
 export default function Header() {
   const { isStealthMode, toggleStealthMode } = useStealthMode();
   const { isDarkMode, toggleTheme } = useTheme();
 
+  // Search state
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Stock[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  // Handle outside click to close search results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Search logic
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+
+    if (!value.trim()) {
+      setResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    try {
+      const data = await stockService.searchStocks(value);
+      setResults(data || []);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
+  };
+
+  const handleSelectStock = (ticker: string) => {
+    router.push(`/stocks/${ticker}`);
+    setQuery("");
+    setShowResults(false);
+  };
+
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
-      <nav className="container mx-auto px-6 py-3 flex items-center justify-between">
+      <nav className="container mx-auto px-6 py-3 flex items-center justify-between gap-4">
+        {/* Left Section: Logo & Nav */}
         <div className="flex items-center space-x-8">
-          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+          <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white shrink-0">
             SNOWBALL
           </Link>
           <div className="hidden md:flex items-center space-x-6">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="relative group">
-              <button className="text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-1">
-                Tools
-              </button>
-              <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="py-2">
-                  {toolsNav.map((tool: NavLink) => (
-                    <Link
-                      key={tool.href}
-                      href={tool.href}
-                      className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      {tool.icon && (
-                        <span className="text-lg">{tool.icon}</span>
-                      )}
-                      <div>
-                        <div className="font-medium">{tool.label}</div>
-                        {tool.description && (
-                          <div className="text-sm text-gray-500">
-                            {tool.description}
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
             <Link
-              href="/community"
-              className="text-xs text-gray-600 hover:text-gray-900 transition-colors"
+              href="/"
+              className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
-              Community
+              Dashboard
+            </Link>
+            <Link
+              href="/stocks"
+              className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              Stocks
             </Link>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        {/* Middle Section: Search Bar */}
+        <div className="flex-1 max-w-xl mx-4 relative" ref={searchRef}>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all sm:text-sm"
+              placeholder="Search companies (e.g. AAPL, Apple)..."
+              value={query}
+              onChange={handleSearch}
+              onFocus={() => { if (query) setShowResults(true); }}
+            />
+          </div>
+
+          {/* Search Results Dropdown */}
+          {showResults && results.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
+              {results.map((stock) => (
+                <button
+                  key={stock.ticker}
+                  onClick={() => handleSelectStock(stock.ticker)}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between group border-b border-gray-100 dark:border-gray-700 last:border-0"
+                >
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      {stock.ticker}
+                      <span className="px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 font-normal">
+                        {stock.exchange}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px] sm:max-w-xs">{stock.name}</div>
+                  </div>
+                  <div className={`text-sm font-medium ${(stock.change ?? 0) >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                    }`}>
+                    ${stock.price?.toFixed(2)}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          {showResults && query && results.length === 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 text-center text-gray-500 dark:text-gray-400 z-50">
+              No results found for "{query}"
+            </div>
+          )}
+        </div>
+
+        {/* Right Section: Actions */}
+        <div className="flex items-center space-x-4 shrink-0">
           <button
             onClick={toggleStealthMode}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
