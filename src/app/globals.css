@@ -16,6 +16,13 @@
   }
 }
 
+/* Support class-based dark mode (e.g. from next-themes) */
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom,
@@ -60,5 +67,22 @@ body {
     /* Chrome, Safari, Opera */
     width: 0 !important;
     height: 0 !important;
+  }
+}
+
+@media print {
+  header {
+    display: none !important;
+  }
+
+  .hide-print {
+    display: none !important;
+  }
+
+  /* Ensure backgrounds are printed if user browser settings allow, 
+     but mainly to keep layout sane */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
