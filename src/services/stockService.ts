@@ -7,6 +7,7 @@ import type {
   FinancialDataResponse,
   StatementType,
   PeriodType,
+  QuoteData,
 } from "@/types";
 
 export interface PriceChangeData {
@@ -100,7 +101,7 @@ export const stockService = {
   /**
    * Get real-time quote for a stock
    */
-  async getQuote(ticker: string): Promise<any> {
-    return apiRequest<any>(`/api/stocks/${ticker}/quote`);
+  async getQuote(ticker: string): Promise<QuoteData> {
+    return apiRequest<QuoteData>(`/api/stocks/${ticker}/quote`);
   },
 };

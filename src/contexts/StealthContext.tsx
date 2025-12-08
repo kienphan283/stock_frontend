@@ -26,9 +26,10 @@ export function StealthProvider({ children }: { children: ReactNode }) {
       currency: 'USD',
     }
 
-    // Use more decimals for small numbers
+    // Use more decimals for very small numbers (< $1.00)
+    // But don't force trailing zeros if not needed (e.g. $0.45 should be $0.45, not $0.4500)
     if (absPrice > 0 && absPrice < 1) {
-      options.minimumFractionDigits = 4
+      options.minimumFractionDigits = 2
       options.maximumFractionDigits = 4
     }
 
