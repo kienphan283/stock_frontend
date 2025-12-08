@@ -5,6 +5,7 @@ import Image from "next/image";
 import { FeaturedNews, HeatmapData } from "@/types/market";
 import { getNews } from "@/services/newsService";
 import { fetchMarketStocks } from "@/services/marketMetadataService";
+import { hasCompanyData } from "@/utils/company";
 
 // Top 30 popular stock tickers for mock news
 const POPULAR_TICKERS = [
@@ -170,7 +171,9 @@ export default function FeaturedNewsPanel({ heatmapData }: FeaturedNewsPanelProp
           const stocks = await fetchMarketStocks();
           if (stocks && stocks.length > 0) {
             // Get first 30 tickers from market data
-            allTickers = stocks.slice(0, 30).map(s => s.symbol.toUpperCase());
+            allTickers = stocks
+              .slice(0, 30)
+              .map(s => s.symbol.toUpperCase());
           }
         } catch (err) {
           // Fallback to popular tickers if fetch fails
@@ -184,8 +187,12 @@ export default function FeaturedNewsPanel({ heatmapData }: FeaturedNewsPanelProp
           }
         }
 
-        // Select 6 different random tickers from the list
-        const shuffled = [...allTickers].sort(() => Math.random() - 0.5);
+        // Chỉ giữ những mã có dữ liệu/logo (để ảnh/metadata đầy đủ)
+        const filtered = allTickers.filter((t) => hasCompanyData(t));
+
+        // Select 6 different random tickers from the filtered list (fallback to original if empty)
+        const source = filtered.length > 0 ? filtered : allTickers;
+        const shuffled = [...source].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, 6);
         setSelectedTickers(selected);
 
@@ -194,7 +201,9 @@ export default function FeaturedNewsPanel({ heatmapData }: FeaturedNewsPanelProp
         setNews(mockNews);
       } catch (err) {
         // Fallback to popular tickers if all fails
-        const shuffled = [...POPULAR_TICKERS].sort(() => Math.random() - 0.5);
+        const filtered = POPULAR_TICKERS.filter((t) => hasCompanyData(t));
+        const source = filtered.length > 0 ? filtered : POPULAR_TICKERS;
+        const shuffled = [...source].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, 6);
         setSelectedTickers(selected);
         const mockNews = generateMockNews(selected, stockDataMap, 6);

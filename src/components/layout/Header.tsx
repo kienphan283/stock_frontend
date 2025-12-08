@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useStealthMode } from "@/contexts/StealthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { stockService } from "@/services/stockService";
+import { hasCompanyData } from "@/utils/company";
 import type { Stock } from "@/types";
 
 export default function Header() {
@@ -43,7 +44,9 @@ export default function Header() {
 
     try {
       const data = await stockService.searchStocks(value);
-      setResults(data || []);
+      // Chỉ giữ các mã có dữ liệu/logo trong companiesData để tránh thiếu ảnh
+      const filtered = (data || []).filter((s) => hasCompanyData(s.ticker));
+      setResults(filtered);
       setShowResults(true);
     } catch (error) {
       console.error("Search failed:", error);
