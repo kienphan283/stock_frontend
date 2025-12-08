@@ -620,7 +620,7 @@ export default function FinancialsTab({ ticker }: FinancialsTabProps) {
                           </div>
                         </td>
                         {groupedData.periods.map((period) => {
-                          const cellValue = row.data[period];
+                          const cellValue = row.data?.[period];
                           const isNegative = cellValue !== undefined && cellValue < 0;
 
                           return (
