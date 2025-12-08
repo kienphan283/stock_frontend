@@ -161,11 +161,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                   <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                     <button
                       onClick={() => setChartType("line")}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                        chartType === "line"
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${chartType === "line"
                           ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
                           : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                        }`}
                       title="Line Chart"
                     >
                       <svg
@@ -184,11 +183,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                     </button>
                     <button
                       onClick={() => setChartType("candlestick")}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                        chartType === "candlestick"
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${chartType === "candlestick"
                           ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
                           : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                        }`}
                       title="Candlestick Chart"
                     >
                       <svg
@@ -311,15 +309,21 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">P/E</span>
-                  <span className="font-medium text-gray-900 dark:text-white">37.3</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.pe ? stock.pe.toFixed(2) : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">EPS</span>
-                  <span className="font-medium text-gray-900 dark:text-white">6.58</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.eps ? stock.eps.toFixed(2) : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Beta</span>
-                  <span className="font-medium text-gray-900 dark:text-white">1.165</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.beta ? stock.beta.toFixed(3) : "—"}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -332,15 +336,21 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Revenue, YoY</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">9.63%</span>
+                  <span className={`font-medium ${stock.revenueGrowth && stock.revenueGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.revenueGrowth ? `${stock.revenueGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Net income, YoY</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">9.26%</span>
+                  <span className={`font-medium ${stock.netIncomeGrowth && stock.netIncomeGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.netIncomeGrowth ? `${stock.netIncomeGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">FCF, YoY</span>
-                  <span className="font-medium text-red-600 dark:text-red-400">-8.62%</span>
+                  <span className={`font-medium ${stock.fcfGrowth && stock.fcfGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.fcfGrowth ? `${stock.fcfGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
               </div>
             </Card>

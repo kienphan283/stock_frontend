@@ -7,9 +7,7 @@ export const ITEMS_PER_PAGE = 20;
 // Stock tabs
 export const STOCK_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "dividends", label: "Dividends" },
   { id: "financials", label: "Financials" },
-  { id: "news", label: "News" },
   { id: "community", label: "Community" },
 ] as const;
 

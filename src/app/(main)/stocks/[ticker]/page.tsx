@@ -8,9 +8,7 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import StockHeader from "./(components)/stock-header";
 import StockTabNavigation from "./(components)/stock-tab-navigation";
 import OverviewTab from "./(components)/tabs/tab-overview";
-import DividendsTab from "./(components)/tabs/tab-dividends";
 import FinancialsTab from "./(components)/tabs/tab-financials";
-import NewsTab from "./(components)/tabs/tab-news";
 import CommunityTab from "./(components)/tabs/tab-community";
 import { useURLTabState } from "@/hooks/useURLTabState";
 import { StockTabId } from "@/constants";
@@ -21,7 +19,7 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ticker, setTicker] = useState<string>("");
-  const { activeTab, changeTab } = useURLTabState("dividends");
+  const { activeTab, changeTab } = useURLTabState("overview");
 
   useEffect(() => {
     const fetchStock = async () => {
@@ -44,6 +42,12 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
             // Map legacy fields for compatibility
             stockData.priceChange = quote.change;
             stockData.priceChangePercent = quote.percentChange;
+
+            // Map new fields
+            if (quote.beta) stockData.beta = quote.beta;
+            if (quote.revenueGrowth) stockData.revenueGrowth = quote.revenueGrowth;
+            if (quote.netIncomeGrowth) stockData.netIncomeGrowth = quote.netIncomeGrowth;
+            if (quote.fcfGrowth) stockData.fcfGrowth = quote.fcfGrowth;
           }
         } catch (quoteErr) {
           console.warn("Could not fetch quote:", quoteErr);
@@ -88,16 +92,12 @@ function StockPageContent({ params }: { params: Promise<{ ticker: string }> }) {
     switch (activeTab) {
       case "overview":
         return <OverviewTab stock={stock} />;
-      case "dividends":
-        return <DividendsTab ticker={stock.ticker} />;
       case "financials":
         return <FinancialsTab ticker={stock.ticker} />;
-      case "news":
-        return <NewsTab ticker={stock.ticker} />;
       case "community":
         return <CommunityTab ticker={stock.ticker} />;
       default:
-        return <DividendsTab ticker={stock.ticker} />;
+        return <OverviewTab stock={stock} />;
     }
   };
 
