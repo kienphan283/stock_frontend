@@ -20,10 +20,20 @@ export function StealthProvider({ children }: { children: ReactNode }) {
 
   const formatPrice = (price: number) => {
     if (isStealthMode) return '••••'
-    return new Intl.NumberFormat('en-US', {
+    const absPrice = Math.abs(price)
+    const options: Intl.NumberFormatOptions = {
       style: 'currency',
       currency: 'USD',
-    }).format(price)
+    }
+
+    // Use more decimals for very small numbers (< $1.00)
+    // But don't force trailing zeros if not needed (e.g. $0.45 should be $0.45, not $0.4500)
+    if (absPrice > 0 && absPrice < 1) {
+      options.minimumFractionDigits = 2
+      options.maximumFractionDigits = 4
+    }
+
+    return new Intl.NumberFormat('en-US', options).format(price)
   }
 
   const formatNumber = (num: number, suffix = '') => {

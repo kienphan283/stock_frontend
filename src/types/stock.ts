@@ -21,6 +21,18 @@ export interface Stock {
   latestQuarter?: string;
 }
 
+export interface QuoteData {
+  currentPrice: number;
+  change: number;
+  percentChange: number;
+  high: number;
+  low: number;
+  open: number;
+  previousClose: number;
+  pe?: number;
+  eps?: number;
+}
+
 export interface DividendEvent {
   id: string;
   ticker: string;

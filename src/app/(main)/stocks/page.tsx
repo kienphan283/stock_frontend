@@ -24,19 +24,19 @@ export default function StocksPage() {
     const fetchStocks = async () => {
       try {
         const stocksData = await stockService.getStocks();
-        
+
         // Fetch price for each stock
         const stocksWithPrices = await Promise.all(
           stocksData.map(async (stock) => {
             try {
-              const detailStock = await stockService.getStock(stock.ticker);
-              return { ...stock, price: detailStock.price };
+              const quote = await stockService.getQuote(stock.ticker);
+              return { ...stock, price: quote.currentPrice };
             } catch {
               return stock; // Keep original if fetch fails
             }
           })
         );
-        
+
         setStocks(stocksWithPrices);
 
         // Extract unique sectors from data (normalize to title case)
@@ -49,9 +49,9 @@ export default function StocksPage() {
           )
         )
           .sort()
-          .map((s) => 
+          .map((s) =>
             // Convert to title case for display
-            s.split(' ').map(word => 
+            s.split(' ').map(word =>
               word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
             ).join(' ')
           );
@@ -61,7 +61,7 @@ export default function StocksPage() {
 
         if (sector) {
           filtered = filtered.filter(
-            (stock: Stock) => 
+            (stock: Stock) =>
               stock.sector?.toLowerCase() === sector.toLowerCase()
           );
         }
@@ -85,7 +85,7 @@ export default function StocksPage() {
     // Filter by sector if selected
     if (sector) {
       filtered = filtered.filter(
-        (stock: Stock) => 
+        (stock: Stock) =>
           stock.sector?.toLowerCase() === sector.toLowerCase()
       );
     }
@@ -144,8 +144,8 @@ export default function StocksPage() {
   const pageTitle = sector
     ? `${sector.charAt(0).toUpperCase() + sector.slice(1)} Stocks`
     : country
-    ? `${country.charAt(0).toUpperCase() + country.slice(1)} Stocks`
-    : "All Stocks";
+      ? `${country.charAt(0).toUpperCase() + country.slice(1)} Stocks`
+      : "All Stocks";
 
   return (
     <div className="space-y-6 px-4 md:px-6 lg:px-8">
@@ -166,31 +166,29 @@ export default function StocksPage() {
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         {/* Sector Filter */}
         <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => (window.location.href = "/stocks")}
-          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-            !sector && !country
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
-        >
-          All Sectors
-        </button>
-        {availableSectors.map((sectorName) => (
           <button
-            key={sectorName}
-            onClick={() =>
-              (window.location.href = `/stocks?sector=${encodeURIComponent(sectorName)}`)
-            }
-            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-              sector === sectorName
+            onClick={() => (window.location.href = "/stocks")}
+            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${!sector && !country
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
           >
-            {sectorName}
+            All Sectors
           </button>
-        ))}
+          {availableSectors.map((sectorName) => (
+            <button
+              key={sectorName}
+              onClick={() =>
+                (window.location.href = `/stocks?sector=${encodeURIComponent(sectorName)}`)
+              }
+              className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${sector === sectorName
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+            >
+              {sectorName}
+            </button>
+          ))}
         </div>
 
         {/* Search Bar */}
