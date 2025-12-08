@@ -54,3 +54,4 @@ export function deriveHeatmapStatus(data: HeatmapData | null): HeatmapStatus | n
 }
 
 
+

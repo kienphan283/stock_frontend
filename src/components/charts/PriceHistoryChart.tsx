@@ -341,8 +341,11 @@ export default function PriceHistoryChart({
 
     if (!xAxisMap || !yAxisMap || !data || data.length === 0) return null;
 
-    const xAxis = xAxisMap[0];
-    const yAxis = yAxisMap[0];
+    // Robustly pick the first X/Y axis regardless of map key naming
+    const xAxisKey = Object.keys(xAxisMap)[0];
+    const yAxisKey = Object.keys(yAxisMap)[0];
+    const xAxis = xAxisMap[xAxisKey];
+    const yAxis = yAxisMap[yAxisKey];
 
     if (!xAxis || !yAxis) return null;
 
@@ -352,7 +355,8 @@ export default function PriceHistoryChart({
     return (
       <g>
         {data.map((entry: any, index: number) => {
-          if (!entry.open || !entry.high || !entry.low) return null;
+          // Skip only when OHLC is truly missing (null/undefined), not when value is 0
+          if (entry.open == null || entry.high == null || entry.low == null) return null;
 
           const { open, high, low, close } = entry;
           const actualClose = close || entry.price;
