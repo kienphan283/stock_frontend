@@ -8,6 +8,7 @@ import PromotionalBanner from "@/components/ui/PromotionalBanner";
 import CompanyInfo from "@/components/shared/CompanyInfo";
 import { PriceHistoryChart, type PriceDataPoint, type ChartType } from "@/components/charts";
 import PeriodSelector from "../PeriodSelector";
+import { DropdownMenu, DropdownItem } from "@/components/ui/DropdownMenu";
 
 interface OverviewTabProps {
   stock: Stock;
@@ -20,6 +21,8 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
   const { formatPrice, formatNumber, isStealthMode } = useStealthMode();
   const [selectedPeriod, setSelectedPeriod] = useState("1m");
   const [priceHistoryData, setPriceHistoryData] = useState<PriceDataPoint[]>([]);
+  const [benchmarkData, setBenchmarkData] = useState<PriceDataPoint[]>([]); // S&P 500 Data
+  const [showBenchmark, setShowBenchmark] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [chartType, setChartType] = useState<ChartType>("line");
@@ -74,6 +77,32 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
         setPriceHistoryData(transformedData);
         console.log(`[OverviewTab] Loaded ${transformedData.length} price records for period ${selectedPeriod}`);
         console.log(`[OverviewTab] Date range: ${transformedData[0]?.date} to ${transformedData[transformedData.length - 1]?.date}`);
+
+        // Fetch Benchmark Data if enabled
+        if (showBenchmark) {
+          const benchUrl = `${API_BASE_URL}/api/stocks/^GSPC/price-history?period=${apiPeriod}`;
+          console.log(`[OverviewTab] Fetching benchmark history: ${benchUrl}`);
+
+          try {
+            const benchRes = await fetch(benchUrl);
+            if (benchRes.ok) {
+              const benchResult = await benchRes.json();
+              if (benchResult.success && benchResult.data) {
+                const benchTransformed: PriceDataPoint[] = benchResult.data.map((item: any) => ({
+                  date: item.date,
+                  price: item.close,
+                }));
+                setBenchmarkData(benchTransformed);
+              }
+            }
+          } catch (benchErr) {
+            console.error("Failed to fetch benchmark data", benchErr);
+            // Don't block main chart rendering on benchmark error
+          }
+        } else {
+          setBenchmarkData([]);
+        }
+
       } catch (err) {
         console.error("[OverviewTab] Error fetching price history:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -84,7 +113,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
     };
 
     fetchPriceHistory();
-  }, [stock.ticker, selectedPeriod]);
+  }, [stock.ticker, selectedPeriod, showBenchmark]);
 
   // Tính toán performance metrics
   const performanceMetrics = useMemo(() => {
@@ -116,7 +145,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
   }, [priceHistoryData]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen transition-colors">
+    <div className=" bg-white dark:bg-gray-900 min-h-screen transition-colors">
       <div className="py-6">
         {/* Promotional Banner */}
         <PromotionalBanner />
@@ -161,11 +190,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                   <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                     <button
                       onClick={() => setChartType("line")}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                        chartType === "line"
-                          ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${chartType === "line"
+                        ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                        }`}
                       title="Line Chart"
                     >
                       <svg
@@ -184,11 +212,10 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                     </button>
                     <button
                       onClick={() => setChartType("candlestick")}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                        chartType === "candlestick"
-                          ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${chartType === "candlestick"
+                        ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                        }`}
                       title="Candlestick Chart"
                     >
                       <svg
@@ -225,21 +252,42 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                       />
                     </svg>
                   </div>
-                  <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+
+                  {/* Dropdown Menu for Compare */}
+                  <DropdownMenu
+                    trigger={
+                      <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+                          />
+                        </svg>
+                      </button>
+                    }
+                  >
+                    <DropdownItem
+                      onClick={() => setShowBenchmark(!showBenchmark)}
+                      active={showBenchmark}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                      />
-                    </svg>
-                  </button>
+                      <div className="flex items-center justify-between w-full">
+                        <span>Compare with S&P 500</span>
+                        {showBenchmark && (
+                          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </DropdownItem>
+                  </DropdownMenu>
+
                 </div>
               </div>
 
@@ -281,6 +329,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
                 ) : (
                   <PriceHistoryChart
                     data={priceHistoryData}
+                    benchmarkData={benchmarkData}
                     height={450}
                     isStealthMode={isStealthMode}
                     showMinMax={true}
@@ -311,15 +360,21 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">P/E</span>
-                  <span className="font-medium text-gray-900 dark:text-white">37.3</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.pe ? stock.pe.toFixed(2) : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">EPS</span>
-                  <span className="font-medium text-gray-900 dark:text-white">6.58</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.eps ? stock.eps.toFixed(2) : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Beta</span>
-                  <span className="font-medium text-gray-900 dark:text-white">1.165</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {isStealthMode ? "••••" : stock.beta ? stock.beta.toFixed(3) : "—"}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -332,15 +387,21 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Revenue, YoY</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">9.63%</span>
+                  <span className={`font-medium ${stock.revenueGrowth && stock.revenueGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.revenueGrowth ? `${stock.revenueGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Net income, YoY</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">9.26%</span>
+                  <span className={`font-medium ${stock.netIncomeGrowth && stock.netIncomeGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.netIncomeGrowth ? `${stock.netIncomeGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">FCF, YoY</span>
-                  <span className="font-medium text-red-600 dark:text-red-400">-8.62%</span>
+                  <span className={`font-medium ${stock.fcfGrowth && stock.fcfGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {isStealthMode ? "••••" : stock.fcfGrowth ? `${stock.fcfGrowth.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
               </div>
             </Card>

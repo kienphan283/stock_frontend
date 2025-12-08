@@ -19,6 +19,10 @@ export interface Stock {
   peRatio?: number;
   eps?: number;
   latestQuarter?: string;
+  beta?: number;
+  revenueGrowth?: number;
+  netIncomeGrowth?: number;
+  fcfGrowth?: number;
 }
 
 export interface QuoteData {
@@ -31,6 +35,10 @@ export interface QuoteData {
   previousClose: number;
   pe?: number;
   eps?: number;
+  beta?: number;
+  revenueGrowth?: number;
+  netIncomeGrowth?: number;
+  fcfGrowth?: number;
 }
 
 export interface DividendEvent {
