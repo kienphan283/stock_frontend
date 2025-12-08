@@ -247,7 +247,7 @@ export default function FeaturedNewsPanel({ heatmapData }: FeaturedNewsPanelProp
         // Update title with new percentage
         const title = template
           .replace("{TICKER}", ticker)
-          .replace("{PERCENT}", Math.abs(realChangePercent).toFixed(2));
+          .replace("{PERCENT}", Math.abs(realChangePercent || 0).toFixed(2));
 
         return {
           ...article,
