@@ -111,28 +111,46 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
 
         if (!isMounted) return;
 
-        // Tạo structure ngay với metadata (không cần chờ previousClose)
-        // previousClose sẽ được load trong background và update sau
+        // Fetch EOD data immediately to avoid "Green Flash" (0% change)
+        // We await this so the first render has meaningful colors
+        const symbolList = stocks.map(s => s.symbol);
+        let eodData: Record<string, any> = {};
+        try {
+          eodData = await fetchLatestEodBatch(symbolList);
+        } catch (err) {
+          console.warn("Failed to fetch initial EOD data", err);
+        }
+
         const sectorsMap = new Map<string, StockHeatmapItem[]>();
         stocks.forEach((meta) => {
           const sectorKey = meta.sector || "Unknown";
           const existing = sectorsMap.get(sectorKey) ?? [];
           const normalizedSymbol = meta.symbol.toUpperCase();
+          const eod = eodData[normalizedSymbol];
 
-          const marketCap =
-            typeof meta.marketCap === "number" ? meta.marketCap : undefined;
+          const marketCap = typeof meta.marketCap === "number" ? meta.marketCap : undefined;
 
-          // Tạo item với previousClose = undefined tạm thời (sẽ update sau)
+          // Use EOD data if available, otherwise default to 0
+          const price = eod?.price ?? 0;
+          const previousClose = eod?.previousClose ?? undefined;
+          const volume = eod?.volume ?? 0;
+          const changePercent = eod?.changePercent ?? 0;
+          const change = eod ? (price - previousClose) : 0;
+
           const item: StockHeatmapItem = {
             ticker: normalizedSymbol,
             name: meta.name || normalizedSymbol,
             sector: sectorKey,
-            price: 0, // Sẽ được update từ realtime
-            change: 0,
-            changePercent: 0,
-            volume: 0, // Sẽ được update từ DB API
-            previousClose: undefined, // Sẽ được update sau khi fetch xong
-            size: 1, // Minimum size, sẽ được update khi có volume
+            price: price,
+            change: change,
+            changePercent: changePercent,
+            volume: volume,
+            previousClose: previousClose,
+            size: computeSize({
+              marketCap,
+              volume,
+              changePercent,
+            }),
             marketCap,
           };
 
@@ -147,13 +165,17 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
               0
             );
 
+            const avgChange = sectorStocks.length > 0
+              ? sectorStocks.reduce((sum, s) => sum + (s.changePercent ?? 0), 0) / sectorStocks.length
+              : 0;
+
             return {
               sector: sectorKey,
               displayName: sectorKey,
               color: "#3b82f6",
               stocks: sectorStocks,
               totalMarketCap: totalSize,
-              avgChange: 0,
+              avgChange,
             };
           }
         );
@@ -164,98 +186,9 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
           lastUpdate: new Date().toISOString(),
         };
 
-        // Set data ngay để hiển thị skeleton/empty state, không cần chờ previousClose
         setData(base);
         setError(null);
-        setIsLoading(false); // Set loading = false sớm để UI hiển thị ngay
-
-        // Fetch previousClose trong background và update sau (không block UI)
-        const symbols = stocks.map((s) => s.symbol);
-
-        // Always fetch latest EOD data to ensure we have a baseline snapshot
-        // This is crucial for "Demo Mode" or when WebSocket is silent
-        fetchLatestEodBatch(symbols)
-          .then((eodData) => {
-            if (!isMounted) return;
-
-            // Update data with EOD values
-            setData((prev) => {
-              if (!prev) return prev;
-
-              const updatedSectors: SectorGroup[] = prev.sectors.map((sector) => {
-                const updatedStocks: StockHeatmapItem[] = sector.stocks.map((stock) => {
-                  const symbol = stock.ticker.toUpperCase();
-                  const eod = eodData[symbol];
-
-                  if (eod) {
-                    return {
-                      ...stock,
-                      price: eod.price,
-                      change: eod.price - eod.previousClose,
-                      changePercent: eod.changePercent,
-                      volume: eod.volume,
-                      previousClose: eod.previousClose,
-                      size: computeSize({
-                        marketCap: stock.marketCap,
-                        volume: eod.volume,
-                        changePercent: eod.changePercent,
-                      }),
-                    };
-                  }
-                  return stock;
-                });
-
-                const avgChange = updatedStocks.length > 0
-                  ? updatedStocks.reduce((sum, s) => sum + (s.changePercent ?? 0), 0) / updatedStocks.length
-                  : 0;
-
-                return {
-                  ...sector,
-                  stocks: updatedStocks,
-                  avgChange,
-                };
-              });
-
-              return {
-                ...prev,
-                sectors: updatedSectors,
-                lastUpdate: new Date().toISOString(),
-              };
-            });
-          })
-          .catch(() => { });
-
-        // Fetch previousClose để dùng cho realtime data (khi market mở)
-        fetchPreviousClosesBatch(symbols)
-          .then((previousCloses) => {
-            if (!isMounted) return;
-            // Update previousClose cho từng stock
-            setData((prev) => {
-              if (!prev) return prev;
-              const updatedSectors = prev.sectors.map((sector) => ({
-                ...sector,
-                stocks: sector.stocks.map((stock) => {
-                  const pc = previousCloses[stock.ticker];
-                  // If price is 0 (no realtime trade yet), use previousClose as current price
-                  // so the heatmap displays meaningful values instead of 0
-                  const effectivePrice = stock.price === 0 ? (pc ?? 0) : stock.price;
-
-                  return {
-                    ...stock,
-                    price: effectivePrice,
-                    previousClose: pc,
-                  };
-                }),
-              }));
-              return {
-                ...prev,
-                sectors: updatedSectors,
-              };
-            });
-          })
-          .catch(() => {
-            // Không set error, chỉ log warning - UI vẫn hoạt động bình thường
-          });
+        // isLoading will be set to false in finally block
       } catch (error) {
         const errorMessage =
           error instanceof Error
