@@ -172,61 +172,58 @@ export function useRealtimeHeatmap(): UseRealtimeHeatmapResult {
         // Fetch previousClose trong background và update sau (không block UI)
         const symbols = stocks.map((s) => s.symbol);
 
-        // ✅ Check market hours: nếu market đóng, fetch latest EOD data thay vì chờ realtime
-        const marketOpen = isMarketOpen();
-        if (!marketOpen) {
-          // Market đóng → fetch latest EOD data của phiên vừa kết thúc
-          fetchLatestEodBatch(symbols)
-            .then((eodData) => {
-              if (!isMounted) return;
+        // Always fetch latest EOD data to ensure we have a baseline snapshot
+        // This is crucial for "Demo Mode" or when WebSocket is silent
+        fetchLatestEodBatch(symbols)
+          .then((eodData) => {
+            if (!isMounted) return;
 
-              // Update data với EOD values
-              setData((prev) => {
-                if (!prev) return prev;
+            // Update data with EOD values
+            setData((prev) => {
+              if (!prev) return prev;
 
-                const updatedSectors: SectorGroup[] = prev.sectors.map((sector) => {
-                  const updatedStocks: StockHeatmapItem[] = sector.stocks.map((stock) => {
-                    const symbol = stock.ticker.toUpperCase();
-                    const eod = eodData[symbol];
+              const updatedSectors: SectorGroup[] = prev.sectors.map((sector) => {
+                const updatedStocks: StockHeatmapItem[] = sector.stocks.map((stock) => {
+                  const symbol = stock.ticker.toUpperCase();
+                  const eod = eodData[symbol];
 
-                    if (eod) {
-                      return {
-                        ...stock,
-                        price: eod.price,
-                        change: eod.price - eod.previousClose,
-                        changePercent: eod.changePercent,
+                  if (eod) {
+                    return {
+                      ...stock,
+                      price: eod.price,
+                      change: eod.price - eod.previousClose,
+                      changePercent: eod.changePercent,
+                      volume: eod.volume,
+                      previousClose: eod.previousClose,
+                      size: computeSize({
+                        marketCap: stock.marketCap,
                         volume: eod.volume,
-                        previousClose: eod.previousClose,
-                        size: computeSize({
-                          marketCap: stock.marketCap,
-                          volume: eod.volume,
-                          changePercent: eod.changePercent,
-                        }),
-                      };
-                    }
-                    return stock;
-                  });
-
-                  const avgChange = updatedStocks.length > 0
-                    ? updatedStocks.reduce((sum, s) => sum + (s.changePercent ?? 0), 0) / updatedStocks.length
-                    : 0;
-
-                  return {
-                    ...sector,
-                    stocks: updatedStocks,
-                    avgChange,
-                  };
+                        changePercent: eod.changePercent,
+                      }),
+                    };
+                  }
+                  return stock;
                 });
 
+                const avgChange = updatedStocks.length > 0
+                  ? updatedStocks.reduce((sum, s) => sum + (s.changePercent ?? 0), 0) / updatedStocks.length
+                  : 0;
+
                 return {
-                  ...prev,
-                  sectors: updatedSectors,
-                  lastUpdate: new Date().toISOString(),
+                  ...sector,
+                  stocks: updatedStocks,
+                  avgChange,
                 };
               });
-            })
-            .catch(() => { });
-        }
+
+              return {
+                ...prev,
+                sectors: updatedSectors,
+                lastUpdate: new Date().toISOString(),
+              };
+            });
+          })
+          .catch(() => { });
 
         // Fetch previousClose để dùng cho realtime data (khi market mở)
         fetchPreviousClosesBatch(symbols)
