@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} h-screen min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors`}
+        className={`${inter.className} min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors`}
       >
         <ErrorBoundary>
           <ClientProviders>
