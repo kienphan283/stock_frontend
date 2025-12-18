@@ -33,9 +33,11 @@ export default function PortfolioHoldings({ portfolio, onRefresh }: PortfolioHol
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const filteredPortfolio = portfolio.filter(p =>
-        p.ticker.toLowerCase().includes(filter.toLowerCase())
-    );
+    const filteredPortfolio = portfolio.filter(p => {
+        const matchesFilter = p.ticker.toLowerCase().includes(filter.toLowerCase());
+        const matchesSold = showSold ? true : p.shares > 0;
+        return matchesFilter && matchesSold;
+    });
 
     // Handlers
     const toggleSelection = (ticker: string) => {
@@ -87,11 +89,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh }: PortfolioHol
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* ... (Toggles) ... */}
                     <div className="flex items-center gap-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-1 flex border border-gray-200 dark:border-gray-700">
-                            <button onClick={() => setCurrencyMode('holdings')} className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${currencyMode === 'holdings' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}>In holding currency</button>
-                            <button onClick={() => setCurrencyMode('usd')} className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${currencyMode === 'usd' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}>In USD</button>
-                        </div>
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
                             <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${showSold ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
                                 <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${showSold ? 'translate-x-4' : ''}`} />
                             </div>
