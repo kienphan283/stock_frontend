@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useStealthMode } from "@/contexts/StealthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { stockService } from "@/services/stockService";
 import { hasCompanyData } from "@/utils/company";
 import type { Stock } from "@/types";
@@ -12,6 +13,11 @@ import type { Stock } from "@/types";
 export default function Header() {
   const { isStealthMode, toggleStealthMode } = useStealthMode();
   const { isDarkMode, toggleTheme } = useTheme();
+  // Consume AuthContext for reactive user state
+  const { user, logout } = useAuth();
+
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Search state
   const [query, setQuery] = useState("");
@@ -20,11 +26,14 @@ export default function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Handle outside click to close search results
+  // Handle outside click to close search results and user menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowResults(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -59,6 +68,15 @@ export default function Header() {
     setShowResults(false);
   };
 
+  const getDisplayName = () => {
+    if (!user) return "";
+    if (user.full_name) return user.full_name;
+    return user.email.split("@")[0];
+  };
+
+  // Safe display name derivation
+  const displayName = getDisplayName();
+
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
       <nav className="container mx-auto px-6 py-3 flex items-center justify-between gap-4">
@@ -74,6 +92,33 @@ export default function Header() {
             >
               Dashboard
             </Link>
+
+            {/* Portfolio Dropdown */}
+            <div className="relative group h-full flex items-center">
+              <Link
+                href="/portfolio"
+                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1"
+              >
+                Portfolio
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+
+              {/* Dropdown Content */}
+              <div className="absolute top-full left-0 mt-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                <Link href="/portfolio?tab=overview" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Overview
+                </Link>
+                <Link href="/portfolio?tab=holdings" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Holdings
+                </Link>
+                <Link href="/portfolio?tab=transactions" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Transactions
+                </Link>
+              </div>
+            </div>
+
             <Link
               href="/stocks"
               className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -196,9 +241,47 @@ export default function Header() {
               </svg>
             )}
           </button>
-          <button className="text-xs bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors">
-            Start for free
-          </button>
+
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-3 pl-6 border-l border-gray-200 dark:border-gray-700 hover:opacity-80 transition-opacity"
+              >
+                <div className="text-right hidden sm:block">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    {displayName}
+                  </div>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-blue-500 overflow-hidden flex items-center justify-center text-white font-medium shadow-sm ring-2 ring-white dark:ring-gray-800">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt={displayName} className="h-full w-full object-cover" />
+                  ) : (
+                    <span>{displayName.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={logout}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/sign-in" className="text-xs bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors">
+              Log in
+            </Link>
+          )}
         </div>
       </nav>
     </header>
