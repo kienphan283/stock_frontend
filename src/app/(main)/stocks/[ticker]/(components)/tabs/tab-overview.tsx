@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { useStealthMode } from "@/contexts/StealthContext";
 import type { Stock } from "@/types";
+import { BACKEND_URL } from "@/services/apiBase";
 import PromotionalBanner from "@/components/ui/PromotionalBanner";
 import CompanyInfo from "@/components/shared/CompanyInfo";
 import { PriceHistoryChart, type PriceDataPoint, type ChartType } from "@/components/charts";
@@ -13,9 +14,6 @@ import { DropdownMenu, DropdownItem } from "@/components/ui/DropdownMenu";
 interface OverviewTabProps {
   stock: Stock;
 }
-
-// API Base URL - Uses Express.js proxy in production, FastAPI directly in dev
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function OverviewTab({ stock }: OverviewTabProps) {
   const { formatPrice, formatNumber, isStealthMode } = useStealthMode();
@@ -48,7 +46,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
         };
 
         const apiPeriod = periodMap[selectedPeriod] || "1m";
-        const url = `${API_BASE_URL}/api/stocks/${stock.ticker}/price-history?period=${apiPeriod}`;
+        const url = `${BACKEND_URL}/api/stocks/${stock.ticker}/price-history?period=${apiPeriod}`;
 
         console.log(`[OverviewTab] Fetching price history: ${url}`);
 
@@ -80,7 +78,7 @@ export default function OverviewTab({ stock }: OverviewTabProps) {
 
         // Fetch Benchmark Data if enabled
         if (showBenchmark) {
-          const benchUrl = `${API_BASE_URL}/api/stocks/^GSPC/price-history?period=${apiPeriod}`;
+          const benchUrl = `${BACKEND_URL}/api/stocks/^GSPC/price-history?period=${apiPeriod}`;
           console.log(`[OverviewTab] Fetching benchmark history: ${benchUrl}`);
 
           try {
