@@ -8,6 +8,7 @@ export interface Portfolio {
   goal_type: string;
   target_amount?: number;
   created_at?: string;
+  is_read_only?: boolean;
 }
 
 export interface PortfolioPosition {
@@ -53,7 +54,7 @@ export interface PortfolioItem {
   cost: number;
 }
 
-export type TransactionType = 'BUY' | 'SELL' | 'DIVIDEND' | 'DEPOSIT' | 'WITHDRAWAL';
+export type TransactionType = 'BUY' | 'SELL' | 'ADJUSTMENT' | 'DIVIDEND' | 'DEPOSIT' | 'WITHDRAWAL';
 
 export interface Transaction {
   id: string;

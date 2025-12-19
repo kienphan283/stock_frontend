@@ -109,6 +109,28 @@ export const portfolioService = {
   },
 
   /**
+   * Adjust holding (create adjustment transaction)
+   */
+  async adjustHolding(
+    portfolioId: string,
+    ticker: string,
+    targetShares: number,
+    targetAvgPrice: number
+  ): Promise<string> {
+    const res = await apiRequest<{ success: boolean; transaction_id: string }>(
+      `/api/portfolio/${portfolioId}/holdings/${ticker}/adjust`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          target_shares: targetShares,
+          target_avg_price: targetAvgPrice
+        })
+      }
+    );
+    return res.transaction_id;
+  },
+
+  /**
    * Get transaction history
    */
   async getTransactions(portfolioId: string = 'default_portfolio_id'): Promise<import("@/types").Transaction[]> {
@@ -127,7 +149,10 @@ export const portfolioService = {
       name: tx.stock_ticker,
       shares: Number(tx.quantity),
       price: Number(tx.price),
-      amount: Number(tx.quantity) * Number(tx.price),
+      // Use explicit amount if available (for ADJUSTMENT support), fallback to qty*price
+      amount: tx.amount !== undefined && tx.amount !== null
+        ? Number(tx.amount)
+        : Number(tx.quantity) * Number(tx.price),
       date: tx.transaction_date,
       status: 'completed',
       fee: Number(tx.fee),
@@ -145,7 +170,10 @@ export const portfolioService = {
     const res = await apiRequest<{ portfolios: any[]; total_value: number }>("/api/portfolio/portfolios?user_id=" + userId);
 
     if (res && Array.isArray(res.portfolios)) {
-      return res.portfolios;
+      return res.portfolios.map(p => ({
+        ...p,
+        is_read_only: p.is_read_only || false
+      }));
     }
     return [];
   },
