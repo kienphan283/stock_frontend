@@ -11,6 +11,8 @@ import PortfolioHoldings from "@/components/portfolio/PortfolioHoldings";
 import PortfolioTransactions from "@/components/portfolio/PortfolioTransactions";
 import CreatePortfolioModal from "@/components/portfolio/CreatePortfolioModal";
 import AddTransactionModal from "@/components/portfolio/AddTransactionModal";
+import PromotionalBanner from "@/components/ui/PromotionalBanner";
+import PortfolioEmptyState from "@/components/portfolio/PortfolioEmptyState";
 
 type Tab = "overview" | "holdings" | "transactions";
 
@@ -37,6 +39,7 @@ export default function PortfolioPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [portfolios, setPortfolios] = useState<import("@/types").Portfolio[]>([]);
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('default_portfolio_id');
+  const selectedPortfolio = portfolios.find(p => p.portfolio_id === selectedPortfolioId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -60,6 +63,14 @@ export default function PortfolioPage() {
         // Fetch portfolios using real user ID
         const userPortfolios = await portfolioService.getPortfolios(user.id);
         setPortfolios(userPortfolios);
+
+        if (userPortfolios.length === 0) {
+          setPortfolios([]);
+          setPortfolio([]);
+          setTransactions([]);
+          setLoading(false);
+          return;
+        }
 
         let currentId = selectedPortfolioId;
         // If selected ID is 'default_portfolio_id' and we have real portfolios, try to pick the first one or find the default one.
@@ -88,9 +99,6 @@ export default function PortfolioPage() {
             currentId = userPortfolios[0].portfolio_id;
             setSelectedPortfolioId(currentId);
           }
-        } else if (userPortfolios.length === 0) {
-          // Case where no portfolios exist at all (rare if we auto-create default)
-          console.warn("No portfolios found for user");
         }
 
         const [portfolioData, transactionsData] = await Promise.all([
@@ -99,6 +107,7 @@ export default function PortfolioPage() {
         ]);
         setPortfolio(portfolioData);
         setTransactions(transactionsData);
+        setError(null);
       } catch (err) {
         setError("Failed to load portfolio data");
         console.error("Error fetching portfolio:", err);
@@ -133,32 +142,50 @@ export default function PortfolioPage() {
     );
   }
 
+  if (!loading && portfolios.length === 0) {
+    return (
+      <div className="h-[calc(100vh-100px)] flex flex-col items-center justify-center overflow-hidden">
+        <PortfolioEmptyState onCreatePortfolio={() => setIsCreateModalOpen(true)} />
+        <CreatePortfolioModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={(newId) => {
+            setRefreshTrigger(prev => prev + 1);
+            if (newId) {
+              setSelectedPortfolioId(newId);
+              localStorage.setItem('lastSelectedPortfolioId', newId);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-6 py-8 space-y-8">
       <div className="flex justify-between items-start">
         {/* ... (Existing JSX) ... */}
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Portfolio</h1>
-            <div className="relative flex items-center gap-2">
-              <div className="relative">
-                <select
-                  value={selectedPortfolioId}
-                  onChange={handlePortfolioChange}
-                  className="appearance-none bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 py-1 pl-3 pr-8 rounded-lg text-lg font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {portfolios.map(p => (
-                    <option key={p.portfolio_id} value={p.portfolio_id}>{p.name}</option>
-                  ))}
-                  {portfolios.length === 0 && <option value="default_portfolio_id">Default Portfolio</option>}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Portfolio</h1>
+            {portfolios.length > 0 && (
+              <div className="relative flex items-center gap-2">
+                <div className="relative">
+                  <select
+                    value={selectedPortfolioId}
+                    onChange={handlePortfolioChange}
+                    className="appearance-none bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 py-1 pl-3 pr-8 rounded-lg text-lg font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {portfolios.map(p => (
+                      <option key={p.portfolio_id} value={p.portfolio_id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                  </div>
                 </div>
-              </div>
 
-              {/* Delete Portfolio Button */}
-              {selectedPortfolioId !== 'default_portfolio_id' && (
+                {/* Delete Portfolio Button */}
                 <button
                   onClick={() => setIsDeletePortfolioModalOpen(true)}
                   className="p-2 text-gray-400 hover:text-red-500 transition-colors"
@@ -166,28 +193,34 @@ export default function PortfolioPage() {
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
           <p className="text-gray-600 dark:text-gray-400">
             Track your investment performance and holdings
           </p>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={() => setIsAddTxModalOpen(true)}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors border border-gray-700 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Add Transaction
-          </button>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            New Portfolio
-          </button>
+          {portfolios.length > 0 && (
+            <div className="relative group">
+              <button
+                onClick={() => setIsAddTxModalOpen(true)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Add Transaction
+              </button>
+            </div>
+          )}
+          {portfolios.length > 0 && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              New Portfolio
+            </button>
+          )}
         </div>
       </div>
 
@@ -241,7 +274,7 @@ export default function PortfolioPage() {
         onClose={() => setIsAddTxModalOpen(false)}
         onSuccess={() => setRefreshTrigger(prev => prev + 1)}
         portfolioId={selectedPortfolioId}
-        portfolioName={portfolios.find(p => p.portfolio_id === selectedPortfolioId)?.name || "Default Portfolio"}
+        portfolioName={portfolios.find(p => p.portfolio_id === selectedPortfolioId)?.name || "Demo Portfolio"}
       />
 
       {/* Content */}
@@ -251,12 +284,14 @@ export default function PortfolioPage() {
           <PortfolioHoldings
             portfolio={portfolio}
             onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+            portfolioId={selectedPortfolioId}
           />
         )}
         {activeTab === "transactions" && (
           <PortfolioTransactions
             transactions={transactions}
             onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+            portfolioId={selectedPortfolioId}
           />
         )}
       </div>

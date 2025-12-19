@@ -380,7 +380,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                     <div className="flex justify-end gap-3 pt-2">
                         <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white text-sm">Cancel</button>
                         <button type="submit" disabled={loading || !!tickerError} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                            {loading ? 'Processing...' : 'Add Transaction'}
+                            {loading ? 'Processing...' : (initialData ? 'Save Changes' : 'Add Transaction')}
                         </button>
                     </div>
                 </form>
