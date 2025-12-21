@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { PortfolioPosition } from "@/types";
 import { useStealthMode } from "@/contexts/StealthContext";
 import { useState } from "react";
-import AddTransactionModal from "./AddTransactionModal";
+
 import EditHoldingModal from "./EditHoldingModal";
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { portfolioService } from '@/services/portfolioService';
@@ -29,7 +29,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
     const [currencyMode, setCurrencyMode] = useState<'holdings' | 'usd'>('holdings');
     const [showSold, setShowSold] = useState(false);
     const [filter, setFilter] = useState('');
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Kept for "Add investments" button internal
+
 
     // Edit State - Removed "Edit" button feature as per requirements, but keeping modal import if needed for future
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -150,25 +150,15 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
                         </div>
-                        <div className="relative group">
-                            <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className={`px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 bg-sky-600 hover:bg-sky-500 shadow-lg shadow-sky-900/20`}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                Add investments
-                            </button>
-                        </div>
+
                     </div>
                 </div>
 
                 <Card className="!p-0 overflow-hidden">
                     {/* Tab Headers */}
+                    {/* Tab Headers */}
                     <div className="border-b border-gray-100 dark:border-gray-700 px-4 py-3 flex gap-6 text-sm font-medium text-gray-500">
                         <button className="text-gray-900 dark:text-white pb-3 -mb-3.5 border-b-2 border-blue-500">My holdings</button>
-                        <button className="hover:text-gray-700 dark:hover:text-gray-300">General</button>
-                        {/* <button className="hover:text-gray-700 dark:hover:text-gray-300">Dividends</button> */}-
-                        <button className="hover:text-gray-700 dark:hover:text-gray-300">Returns</button>
                     </div>
 
                     {filteredPortfolio.length > 0 ? (
@@ -298,7 +288,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                 </div>
             </div>
 
-            <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSuccess={() => { setIsAddModalOpen(false); router.refresh(); }} portfolioId="default_portfolio_id" />
+
 
             <EditHoldingModal
                 isOpen={isEditModalOpen}
