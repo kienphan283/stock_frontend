@@ -36,13 +36,28 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }: Cre
         setLoading(true);
         setError(null);
 
+        // Client-side validation
+        if (formData.target_amount && formData.target_amount > 600000000000) {
+            setError("Amount is too large, please enter a smaller target amount");
+            setLoading(false);
+            return;
+        }
+
         try {
             const newPortfolioId = await portfolioService.createPortfolio(formData);
             onSuccess(newPortfolioId);
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to create portfolio:", err);
-            setError("Failed to create portfolio. Please try again.");
+            // Error message is handled by apiClient
+            const message = err.message || "Failed to create portfolio. Please try again.";
+
+            // User-friendly message for duplicates
+            if (message.includes("already exists")) {
+                setError("A portfolio with this name already exists. Please choose a different name.");
+            } else {
+                setError(message);
+            }
         } finally {
             setLoading(false);
         }
@@ -73,56 +88,8 @@ export default function CreatePortfolioModal({ isOpen, onClose, onSuccess }: Cre
                 </div>
 
                 {/* Currency & Goal */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                            Default currency
-                            <span className="text-gray-600 cursor-help" title="Base currency for this portfolio">?</span>
-                        </label>
-                        <div className="relative">
-                            <select
-                                value={formData.currency}
-                                onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white appearance-none focus:ring-2 focus:ring-blue-500 outline-none"
-                            >
-                                <option value="USD">USD - US Dollar</option>
-                                <option value="EUR">EUR - Euro</option>
-                                <option value="VND">VND - Vietnam Dong</option>
-                            </select>
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1 flex items-center gap-1">
-                            Goal
-                            <span className="text-gray-600 cursor-help" title="Primary goal of this portfolio">?</span>
-                        </label>
-                        <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, goal_type: 'VALUE' }))}
-                                className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${formData.goal_type === 'VALUE'
-                                    ? 'bg-blue-600 text-white shadow-sm'
-                                    : 'text-gray-400 hover:text-white'
-                                    }`}
-                            >
-                                Value
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, goal_type: 'PASSIVE_INCOME' }))}
-                                className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${formData.goal_type === 'PASSIVE_INCOME'
-                                    ? 'bg-blue-600 text-white shadow-sm'
-                                    : 'text-gray-400 hover:text-white'
-                                    }`}
-                            >
-                                Passive income
-                            </button>
-                        </div>
-                    </div>
+                <div className="hidden">
+                    {/* Currency field removed from UI, defaulting to USD */}
                 </div>
 
                 {/* Target Amount */}

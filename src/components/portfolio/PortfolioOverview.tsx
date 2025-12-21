@@ -6,11 +6,12 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis
 interface PortfolioOverviewProps {
     portfolio: PortfolioPosition[];
     transactions?: Transaction[];
+    selectedPortfolio?: import("@/types").Portfolio;
 }
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"];
 
-export default function PortfolioOverview({ portfolio, transactions = [] }: PortfolioOverviewProps) {
+export default function PortfolioOverview({ portfolio, transactions = [], selectedPortfolio }: PortfolioOverviewProps) {
     const { formatPrice } = useStealthMode();
 
     // 1. Calculate Unrealized (Holdings)
@@ -89,6 +90,25 @@ export default function PortfolioOverview({ portfolio, transactions = [] }: Port
                             {formatPrice(totalCostBasisHoldings)} invested
                         </div>
                     </div>
+                    {/* Target Progress Bar */}
+                    {selectedPortfolio?.target_amount && selectedPortfolio.target_amount > 0 && (
+                        <div className="pt-3">
+                            <div className="flex justify-between text-[10px] mb-1">
+                                <span className="text-gray-500 dark:text-gray-400">
+                                    Target: {formatPrice(selectedPortfolio.target_amount)}
+                                </span>
+                                <span className="font-medium text-blue-600 dark:text-blue-400">
+                                    {Math.min((totalCurrentValue / selectedPortfolio.target_amount) * 100, 100).toFixed(1)}%
+                                </span>
+                            </div>
+                            <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                                <div
+                                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out"
+                                    style={{ width: `${Math.min((totalCurrentValue / selectedPortfolio.target_amount) * 100, 100)}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </Card>
 
                 {/* Total Net Profit */}
@@ -130,6 +150,17 @@ export default function PortfolioOverview({ portfolio, transactions = [] }: Port
                     </div>
                 </Card>
             </div>
+
+            {/* Note Section (if exists) */}
+            {selectedPortfolio?.note && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 px-4 py-3 rounded-lg flex items-start gap-3 text-sm border border-blue-100 dark:border-blue-800/30">
+                    <svg className="w-5 h-5 shrink-0 mt-0.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div className="flex-1">
+                        <span className="font-semibold block mb-0.5 text-xs uppercase tracking-wider opacity-70">Portfolio Note</span>
+                        {selectedPortfolio.note}
+                    </div>
+                </div>
+            )}
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

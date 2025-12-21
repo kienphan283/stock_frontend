@@ -16,9 +16,11 @@ interface PortfolioHoldingsProps {
     onRefresh?: () => void;
     portfolioId: string;
     readOnly?: boolean;
+    selectedHoldingTicker?: string | null;
+    onSelectHolding?: (ticker: string | null) => void;
 }
 
-export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, readOnly }: PortfolioHoldingsProps) {
+export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, readOnly, selectedHoldingTicker, onSelectHolding }: PortfolioHoldingsProps) {
     const { formatPrice } = useStealthMode();
     const router = useRouter();
     const pathname = usePathname();
@@ -27,13 +29,13 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
     const [currencyMode, setCurrencyMode] = useState<'holdings' | 'usd'>('holdings');
     const [showSold, setShowSold] = useState(false);
     const [filter, setFilter] = useState('');
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Kept for "Add investments" button internal
 
-    // Edit State
+    // Edit State - Removed "Edit" button feature as per requirements, but keeping modal import if needed for future
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingHolding, setEditingHolding] = useState<PortfolioPosition | null>(null);
 
-    // Selection State
+    // Selection State (for Deletion)
     const [selectedTickers, setSelectedTickers] = useState<Set<string>>(new Set());
 
     // Delete State
@@ -47,14 +49,16 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
     });
 
     // Handlers
-    const toggleSelection = (ticker: string) => {
+    const toggleDeletionSelection = (ticker: string, e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent row click
         const newSet = new Set(selectedTickers);
         if (newSet.has(ticker)) newSet.delete(ticker);
         else newSet.add(ticker);
         setSelectedTickers(newSet);
     };
 
-    const toggleAll = () => {
+    const toggleAllDeletion = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // e.stopPropagation();
         if (selectedTickers.size === filteredPortfolio.length && filteredPortfolio.length > 0) {
             setSelectedTickers(new Set());
         } else {
@@ -62,13 +66,13 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
         }
     };
 
-    const handleEdit = () => {
-        if (selectedTickers.size !== 1) return;
-        const ticker = Array.from(selectedTickers)[0];
-        const holding = portfolio.find(p => p.ticker === ticker) || null;
-        if (holding) {
-            setEditingHolding(holding);
-            setIsEditModalOpen(true);
+    const handleRowClick = (ticker: string) => {
+        if (onSelectHolding) {
+            if (selectedHoldingTicker === ticker) {
+                onSelectHolding(null); // Deselect
+            } else {
+                onSelectHolding(ticker); // Select
+            }
         }
     };
 
@@ -107,20 +111,9 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2 w-full md:w-auto">
-                        {/* Bulk Actions */}
-                        {/* Bulk Actions */}
+                        {/* Bulk Actions (Deletion) */}
                         {selectedTickers.size > 0 && (
                             <div className="flex items-center gap-2 mr-2">
-                                {selectedTickers.size === 1 && (
-                                    <button
-                                        onClick={handleEdit}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
-                                        title="Adjust holding balance and cost"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                        Edit
-                                    </button>
-                                )}
                                 <div className="relative group">
                                     <button
                                         onClick={() => setIsDeleteModalOpen(true)}
@@ -133,6 +126,24 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                             </div>
                         )}
 
+                        {/* Delete Holding option for single selection from row click */}
+                        {(!selectedTickers.size && selectedHoldingTicker) && (
+                            <div className="flex items-center gap-2 mr-2">
+                                <button
+                                    onClick={() => {
+                                        if (selectedHoldingTicker) {
+                                            setSelectedTickers(new Set([selectedHoldingTicker]));
+                                            setIsDeleteModalOpen(true);
+                                        }
+                                    }}
+                                    className="px-4 py-2 text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 border border-red-200 dark:border-red-800"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    Delete Holding
+                                </button>
+                            </div>
+                        )}
+
                         <div className="relative flex-1 md:w-64">
                             <input type="text" placeholder="Search..." value={filter} onChange={(e) => setFilter(e.target.value)} className="w-full pl-3 pr-10 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                             <div className="absolute right-3 top-2.5 text-gray-400">
@@ -142,7 +153,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                         <div className="relative group">
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className={`px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 bg-gray-800 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600`}
+                                className={`px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 bg-sky-600 hover:bg-sky-500 shadow-lg shadow-sky-900/20`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                                 Add investments
@@ -171,7 +182,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                                 type="checkbox"
                                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                 checked={selectedTickers.size === filteredPortfolio.length && filteredPortfolio.length > 0}
-                                                onChange={toggleAll}
+                                                onChange={toggleAllDeletion}
                                             />
                                         </th>
                                         <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Holding</th>
@@ -185,13 +196,22 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                     {filteredPortfolio.map((position) => (
-                                        <tr key={position.ticker} className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group ${selectedTickers.has(position.ticker) ? 'bg-blue-50/10' : ''}`}>
-                                            <td className="py-4 px-4 text-center">
+                                        <tr
+                                            key={position.ticker}
+                                            onClick={() => handleRowClick(position.ticker)}
+                                            className={`transition-colors group cursor-pointer border-b border-gray-100 dark:border-gray-700
+                                                ${selectedHoldingTicker === position.ticker
+                                                    ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800'
+                                                    : selectedTickers.has(position.ticker)
+                                                        ? 'bg-red-50/10'
+                                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700/80'}`}
+                                        >
+                                            <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                     checked={selectedTickers.has(position.ticker)}
-                                                    onChange={() => toggleSelection(position.ticker)}
+                                                    onChange={(e) => toggleDeletionSelection(position.ticker, e as any)}
                                                 />
                                             </td>
                                             <td className="py-4 px-4">
@@ -263,7 +283,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                 </Card>
                 {/* ... Pagination ... */}
                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-3 py-1.5 flex items-center gap-2">
+                    <div className="bg-sky-600 text-white border border-transparent rounded px-3 py-1.5 flex items-center gap-2 shadow-lg shadow-sky-900/20">
                         25 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </div>
                     <span>See 1-{filteredPortfolio.length} from {filteredPortfolio.length}</span>
@@ -286,7 +306,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
                 title="Delete Holdings"
-                message={`Are you sure you want to delete ${selectedTickers.size} selected holdings? This action cannot be undone and will delete ALL transactions associated with these stocks.`}
+                message={`Are you sure you want to delete ${selectedTickers.size} selected holdings? This action cannot be undone and will delete all associated transactions.`}
                 confirmText={`Delete ${selectedTickers.size} Items`}
                 isDestructive={true}
                 isLoading={isDeleting}

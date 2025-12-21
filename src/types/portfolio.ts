@@ -7,6 +7,7 @@ export interface Portfolio {
   currency: string;
   goal_type: string;
   target_amount?: number;
+  note?: string;
   created_at?: string;
   is_read_only?: boolean;
 }

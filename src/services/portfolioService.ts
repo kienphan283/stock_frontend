@@ -1,5 +1,5 @@
 // Portfolio service - API calls for portfolio management
-import { apiRequest } from "./apiBase";
+import { apiRequest } from "./apiClient";
 import type { PortfolioPosition, PortfolioItem } from "@/types";
 
 export const portfolioService = {

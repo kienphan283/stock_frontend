@@ -43,10 +43,17 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedHoldingTicker, setSelectedHoldingTicker] = useState<string | null>(null);
+  const [isAddHoldingModalOpen, setIsAddHoldingModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
   const [isDeletePortfolioModalOpen, setIsDeletePortfolioModalOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Deselect when changing tabs or portfolios
+  useEffect(() => {
+    setSelectedHoldingTicker(null);
+  }, [selectedPortfolioId, activeTab]);
 
   useEffect(() => {
     // Auth Check handled by useAuth, but we wait for it
@@ -117,7 +124,7 @@ export default function PortfolioPage() {
     };
 
     fetchData();
-  }, [refreshTrigger, selectedPortfolioId, user, authLoading]); // Added user dependency
+  }, [refreshTrigger, selectedPortfolioId, user, authLoading]);
 
   const handlePortfolioChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
@@ -162,12 +169,22 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 space-y-8">
+    <div className="container mx-auto px-6 py-4 space-y-6">
+      {/* Breadcrumb View Indicator */}
+      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+        <span>Portfolio</span>
+        <svg className="w-3 h-3 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+        <span className="text-gray-700 dark:text-gray-200 capitalize font-bold">
+          {activeTab}
+        </span>
+      </div>
       <div className="flex justify-between items-start">
         {/* ... (Existing JSX) ... */}
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Portfolio</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Portfolio</h1>
             {portfolios.length > 0 && (
               <div className="relative flex items-center gap-2">
                 <div className="relative">
@@ -184,6 +201,15 @@ export default function PortfolioPage() {
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
                   </div>
                 </div>
+
+                {/* New Portfolio Button (Small +) */}
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="p-2 mr-2 text-sky-500 hover:text-sky-400 hover:bg-sky-500/10 rounded-full transition-colors"
+                  title="Create New Portfolio"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
 
                 {/* Delete Portfolio Button */}
                 <button
@@ -202,24 +228,30 @@ export default function PortfolioPage() {
         </div>
         <div className="flex gap-3">
           {portfolios.length > 0 && (
-            <div className="relative group">
+            <>
               <button
-                onClick={() => setIsAddTxModalOpen(true)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700 flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white`}
+                onClick={() => setIsAddHoldingModalOpen(true)}
+                className="px-4 py-2 rounded-lg font-medium transition-colors border border-transparent flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/20"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                Add Transaction
+                Add Holding
               </button>
-            </div>
-          )}
-          {portfolios.length > 0 && (
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20 flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-              New Portfolio
-            </button>
+
+              <div className="relative group">
+                <button
+                  onClick={() => setIsAddTxModalOpen(true)}
+                  disabled={!selectedHoldingTicker}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors border border-transparent flex items-center gap-2 
+                    ${selectedHoldingTicker
+                      ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-900/20'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300'}`}
+                  title={!selectedHoldingTicker ? "Select a holding above to add a transaction" : "Add transaction for selected holding"}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  Add Transaction
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -275,16 +307,29 @@ export default function PortfolioPage() {
         onSuccess={() => setRefreshTrigger(prev => prev + 1)}
         portfolioId={selectedPortfolioId}
         portfolioName={portfolios.find(p => p.portfolio_id === selectedPortfolioId)?.name || "Demo Portfolio"}
+        mode="TRANSACTION"
+        prefilledTicker={selectedHoldingTicker || undefined}
+      />
+
+      <AddTransactionModal
+        isOpen={isAddHoldingModalOpen}
+        onClose={() => setIsAddHoldingModalOpen(false)}
+        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        portfolioId={selectedPortfolioId}
+        portfolioName={portfolios.find(p => p.portfolio_id === selectedPortfolioId)?.name || "Demo Portfolio"}
+        mode="HOLDING"
       />
 
       {/* Content */}
       <div className="min-h-[400px]">
-        {activeTab === "overview" && <PortfolioOverview portfolio={portfolio} transactions={transactions} />}
+        {activeTab === "overview" && <PortfolioOverview portfolio={portfolio} transactions={transactions} selectedPortfolio={selectedPortfolio} />}
         {activeTab === "holdings" && (
           <PortfolioHoldings
             portfolio={portfolio}
             onRefresh={() => setRefreshTrigger(prev => prev + 1)}
             portfolioId={selectedPortfolioId}
+            selectedHoldingTicker={selectedHoldingTicker}
+            onSelectHolding={setSelectedHoldingTicker}
           />
         )}
         {activeTab === "transactions" && (

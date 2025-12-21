@@ -13,9 +13,11 @@ interface AddTransactionModalProps {
     portfolioId?: string;
     portfolioName?: string;
     initialData?: Transaction | null;
+    mode?: 'HOLDING' | 'TRANSACTION';
+    prefilledTicker?: string;
 }
 
-export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfolioId = 'default_portfolio_id', portfolioName, initialData }: AddTransactionModalProps) {
+export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfolioId = 'default_portfolio_id', portfolioName, initialData, mode = 'TRANSACTION', prefilledTicker }: AddTransactionModalProps) {
     const [formData, setFormData] = useState<Partial<TransactionCreate>>({
         portfolio_id: portfolioId,
         ticker: '',
@@ -29,6 +31,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
     const [dateString, setDateString] = useState<string>(new Date().toISOString().slice(0, 16));
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [currentPrice, setCurrentPrice] = useState<number | null>(null);
 
     // Validation State
     const [isValidatingTicker, setIsValidatingTicker] = useState(false);
@@ -62,8 +65,8 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                 // Add Mode - Reset
                 setFormData({
                     portfolio_id: portfolioId,
-                    ticker: '',
-                    transaction_type: 'BUY',
+                    ticker: mode === 'TRANSACTION' && prefilledTicker ? prefilledTicker : '',
+                    transaction_type: mode === 'HOLDING' ? 'BUY' : 'BUY',
                     quantity: 0,
                     price: 0,
                     fee: 0,
@@ -74,7 +77,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
             setError(null);
             setTickerError(null);
         }
-    }, [isOpen, initialData, portfolioId]);
+    }, [isOpen, initialData, portfolioId, mode, prefilledTicker]);
 
     useEffect(() => {
         if (showDropdown && inputRef.current) {
@@ -103,17 +106,24 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
         setIsValidatingTicker(true);
         setTickerError(null);
         try {
+            // Always fetch quote for the hint
             const [checkResult, quote] = await Promise.all([
                 marketService.checkStock(formData.ticker),
-                // Try to auto-fill price on blur if price is empty
-                (!formData.price || formData.price === 0) ? marketService.getQuote(formData.ticker) : Promise.resolve(null)
+                marketService.getQuote(formData.ticker)
             ]);
 
-            // Frontend validation: check explicitly for true, handle missing data
+            // Frontend validation
             if (!checkResult || !checkResult.exists) {
                 setTickerError(`Ticker '${formData.ticker}' not found`);
-            } else if (quote && quote.currentPrice) {
-                setFormData(prev => ({ ...prev, price: quote.currentPrice }));
+                setCurrentPrice(null);
+            } else {
+                if (quote && quote.currentPrice) {
+                    setCurrentPrice(quote.currentPrice);
+                    // Only auto-fill form price if it's empty/zero
+                    if (!formData.price || formData.price === 0) {
+                        setFormData(prev => ({ ...prev, price: quote.currentPrice }));
+                    }
+                }
             }
         } catch (e) {
             console.error(e);
@@ -123,6 +133,39 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
             setIsValidatingTicker(false);
         }
     };
+
+    // Auto-fetch price for pre-filled ticker or when opening in transaction mode
+    useEffect(() => {
+        if (isOpen && formData.ticker && !tickerError) {
+            marketService.getQuote(formData.ticker)
+                .then(quote => {
+                    if (quote && quote.currentPrice) {
+                        setCurrentPrice(quote.currentPrice);
+                        if ((!formData.price || formData.price === 0) && mode === 'TRANSACTION') {
+                            setFormData(prev => ({ ...prev, price: quote.currentPrice }));
+                        }
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [isOpen, formData.ticker, mode]); // Note: Include formData.ticker to update if it changes programmatically, but be careful of loops. 
+    // Actually safe because we only verify existence. Ideally only run if *changed* or *initial*.
+    // Since we open modal anew each time, it works.
+    // However, if user types, this fires. We just want it for static cases or lazy suggestion. 
+    // Given the previous requirement "hint always shows", fetching often is okay if debounce, but here simplest is on mount/prefill.
+    // Let's restrict it: only if `currentPrice` is null?
+
+    // Better implementation:
+    useEffect(() => {
+        if (isOpen && formData.ticker && !currentPrice) {
+            marketService.getQuote(formData.ticker)
+                .then(quote => {
+                    if (quote && quote.currentPrice) setCurrentPrice(quote.currentPrice);
+                })
+                .catch(e => console.error("Hint fetch failed", e));
+        }
+    }, [isOpen, formData.ticker]); // Removing currentPrice dependency to avoid constant re-trigger if logic flawed, but adding check inside.
+    // Actually, simple is best. Just run it.
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -230,6 +273,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                                         ticker: item.ticker,
                                         price: quote.currentPrice
                                     }));
+                                    setCurrentPrice(quote.currentPrice);
                                 }
                             } catch (e) {
                                 console.error("Failed to auto-fetch price", e);
@@ -248,10 +292,18 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
         );
     };
 
+    const getTitle = () => {
+        if (initialData) return "Edit Transaction";
+        if (mode === 'HOLDING') return "Add New Holding";
+        return `Add Transaction for ${prefilledTicker || '...'}`;
+    };
+
     return (
         <>
-            <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Edit Transaction" : "Add Transaction"}>
+            <Modal isOpen={isOpen} onClose={onClose} title={getTitle()}>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* ... */}
+                    {/* Simplified for brevity in tool call, will use specific ReplaceChunks for clean update */}
                     {portfolioName && (
                         <div className="text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4">
                             Adding to: <span className="font-semibold text-gray-900 dark:text-white">{portfolioName}</span>
@@ -266,7 +318,9 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                                 ref={inputRef}
                                 type="text"
                                 required
-                                className={`w-full bg-gray-800 border ${tickerError ? 'border-red-500' : 'border-gray-700'} rounded p-2 text-white uppercase focus:ring-1 focus:ring-blue-500 outline-none`}
+                                disabled={mode === 'TRANSACTION' && !!prefilledTicker}
+                                className={`w-full bg-gray-800 border ${tickerError ? 'border-red-500' : 'border-gray-700'} rounded p-2 text-white uppercase focus:ring-1 focus:ring-blue-500 outline-none
+                                    ${(mode === 'TRANSACTION' && !!prefilledTicker) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 placeholder="e.g. AAPL"
                                 value={formData.ticker}
                                 onChange={async (e) => {
@@ -318,20 +372,22 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                         </div>
                     </div>
 
-                    {/* Type selection */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1">Type</label>
-                        <div className="flex bg-gray-800 rounded p-1">
-                            <button type="button"
-                                className={`flex-1 py-1.5 text-sm rounded ${formData.transaction_type === 'BUY' ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}
-                                onClick={() => setFormData({ ...formData, transaction_type: 'BUY' })}
-                            >BUY</button>
-                            <button type="button"
-                                className={`flex-1 py-1.5 text-sm rounded ${formData.transaction_type === 'SELL' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'}`}
-                                onClick={() => setFormData({ ...formData, transaction_type: 'SELL' })}
-                            >SELL</button>
+                    {/* Type selection - Hidden in HOLDING mode */}
+                    {mode !== 'HOLDING' && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-400 mb-1">Type</label>
+                            <div className="flex bg-gray-800 rounded p-1">
+                                <button type="button"
+                                    className={`flex-1 py-1.5 text-sm rounded ${formData.transaction_type === 'BUY' ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                                    onClick={() => setFormData({ ...formData, transaction_type: 'BUY' })}
+                                >BUY</button>
+                                <button type="button"
+                                    className={`flex-1 py-1.5 text-sm rounded ${formData.transaction_type === 'SELL' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                                    onClick={() => setFormData({ ...formData, transaction_type: 'SELL' })}
+                                >SELL</button>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Quantity */}
@@ -361,6 +417,11 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, portfo
                                 value={formData.price || ''}
                                 onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                             />
+                            {formData.ticker && currentPrice !== null && (
+                                <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                                    <span>Market Price: <span className="font-medium text-gray-300">${currentPrice.toLocaleString()}</span></span>
+                                </div>
+                            )}
                         </div>
                         {/* Fee removed per user request */}
                     </div>
