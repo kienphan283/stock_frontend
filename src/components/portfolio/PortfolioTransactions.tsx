@@ -60,17 +60,17 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
             <Card className="!p-0 overflow-hidden bg-[#1E1E2D]">
                 {filteredTransactions.length > 0 ? (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-center border-collapse table-fixed">
                             <thead>
                                 <tr className="border-b border-sky-500/20 text-xs uppercase tracking-wider text-gray-500">
-                                    <th className="py-3 px-4">Operation</th>
-                                    <th className="py-3 px-4">Holding</th>
-                                    <th className="py-3 px-4 text-right">Date</th>
-                                    <th className="py-3 px-4 text-right">Shares</th>
-                                    <th className="py-3 px-4 text-right">Price</th>
-                                    <th className="py-3 px-4 text-right">Summ</th>
-                                    <th className="py-3 px-4 text-right">Total profit</th>
-                                    <th className="py-3 px-4">Note</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Operation</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Holding</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Date</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Shares</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Price</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Summ</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-center">Total profit</th>
+                                    <th className="py-4 px-2 w-[12.5%] text-left">Note</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sky-500/20">
@@ -79,7 +79,7 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
                                         key={tx.id}
                                         className="hover:bg-sky-500/5 transition-colors group text-sm"
                                     >
-                                        <td className="py-3 px-4">
+                                        <td className="py-4 px-2 text-center">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getOperationColor(tx.type)}`}>
                                                 {tx.type === 'BUY' && 'Buy'}
                                                 {tx.type === 'SELL' && 'Sell'}
@@ -87,9 +87,9 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
                                                 {tx.type === 'DEPOSIT' && 'Deposit'}
                                             </span>
                                         </td>
-                                        <td className="py-3 px-4">
+                                        <td className="py-4 px-2 text-center">
                                             {tx.ticker ? (
-                                                <div className="flex flex-col">
+                                                <div className="flex flex-col items-center">
                                                     <span className="font-medium text-gray-900 dark:text-white">{tx.name}</span>
                                                     <span className="text-xs text-gray-500">{tx.ticker}</span>
                                                 </div>
@@ -97,23 +97,23 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
                                                 <span className="text-gray-500">-</span>
                                             )}
                                         </td>
-                                        <td className="py-3 px-4 text-right text-gray-900 dark:text-white">
+                                        <td className="py-4 px-2 text-center text-gray-900 dark:text-white">
                                             {tx.date ? new Date(tx.date).toLocaleDateString() : '-'}
                                         </td>
-                                        <td className="py-3 px-4 text-right text-gray-900 dark:text-white">
+                                        <td className="py-4 px-2 text-center text-gray-900 dark:text-white">
                                             {tx.shares}
                                         </td>
-                                        <td className="py-3 px-4 text-right text-gray-900 dark:text-white">
+                                        <td className="py-4 px-2 text-center text-gray-900 dark:text-white">
                                             {formatPrice(tx.price || 0)}
                                         </td>
-                                        <td className="py-3 px-4 text-right">
+                                        <td className="py-4 px-2 text-center">
                                             <span className={tx.type === 'BUY' ? 'text-red-400' : 'text-green-400'}>
                                                 {tx.type === 'BUY' ? '-' : '+'}{formatPrice(tx.amount)}
                                             </span>
                                         </td>
-                                        <td className="py-3 px-4 text-right">
+                                        <td className="py-4 px-2 text-center">
                                             {tx.totalProfit !== undefined ? (
-                                                <div className="flex flex-col items-end">
+                                                <div className="flex flex-col items-center">
                                                     <span className={`font-medium ${tx.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                                         {tx.totalProfit >= 0 ? '▲' : '▼'} {((tx.totalProfit / tx.amount) * 100).toFixed(2)}%
                                                     </span>
@@ -123,12 +123,10 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
                                                 </div>
                                             ) : '-'}
                                         </td>
-                                        <td className="py-3 px-4 text-gray-500">
-                                            {tx.note && (
-                                                <span title={tx.note}>
-                                                    <svg className="w-4 h-4 hover:text-white cursor-pointer" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                                    </svg>
+                                        <td className="py-4 px-2 text-left text-gray-500 truncate" title={tx.note || `${tx.type} ${tx.ticker} ${tx.shares} @ ${formatPrice(tx.price || 0)}`}>
+                                            {tx.note ? tx.note : (
+                                                <span className="opacity-50 italic">
+                                                    {tx.type} {tx.ticker} {tx.shares} @ {formatPrice(tx.price || 0)}
                                                 </span>
                                             )}
                                         </td>
@@ -137,17 +135,17 @@ export default function PortfolioTransactions({ transactions, onRefresh, portfol
                                 {/* Total Row */}
                                 <tr className="border-t border-sky-500/20 bg-sky-500/5 font-semibold text-sm">
                                     <td className="py-4 px-4"></td>
-                                    <td className="py-4 px-4 text-gray-700 dark:text-white">Total</td>
+                                    <td className="py-4 px-4 text-center text-gray-700 dark:text-white">Total</td>
                                     <td className="py-4 px-4"></td>
-                                    <td className="py-4 px-4 text-right text-gray-900 dark:text-white">
+                                    <td className="py-4 px-4 text-center text-gray-900 dark:text-white">
                                         {filteredTransactions.reduce((acc, t) => acc + (t.type === 'BUY' ? (t.shares || 0) : -(t.shares || 0)), 0)}
                                     </td>
                                     <td className="py-4 px-4"></td>
 
-                                    <td className="py-4 px-4 text-right text-red-400">
+                                    <td className="py-4 px-4 text-center text-red-400">
                                         -{formatPrice(filteredTransactions.reduce((acc, t) => acc + (t.type === 'BUY' ? t.amount : 0), 0))}
                                     </td>
-                                    <td className="py-4 px-4 text-right">
+                                    <td className="py-4 px-4 text-center">
                                         <div className={`text-sm font-medium ${filteredTransactions.reduce((acc, t) => acc + (t.totalProfit || 0), 0) >= 0 ? "text-green-500" : "text-red-500"}`}>
                                             {filteredTransactions.reduce((acc, t) => acc + (t.totalProfit || 0), 0) >= 0 ? "+" : ""}{formatPrice(filteredTransactions.reduce((acc, t) => acc + (t.totalProfit || 0), 0))}
                                         </div>

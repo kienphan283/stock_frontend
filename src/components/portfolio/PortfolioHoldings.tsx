@@ -173,11 +173,11 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
 
                     {filteredPortfolio.length > 0 ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left border-collapse table-fixed">
                                 <thead>
                                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                                         {/* Select All */}
-                                        <th className="py-3 px-4 w-10 text-center">
+                                        <th className="py-4 px-2 w-[5%] text-center">
                                             <input
                                                 type="checkbox"
                                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -185,13 +185,13 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                                 onChange={toggleAllDeletion}
                                             />
                                         </th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Holding</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Shares</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Cost per share</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Cost basis</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Current value</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Total profit</th>
-                                        <th className="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-right">Daily</th>
+                                        <th className="py-4 px-2 w-[15%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Holding</th>
+                                        <th className="py-4 px-2 w-[13%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Shares</th>
+                                        <th className="py-4 px-2 w-[13%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Cost per share</th>
+                                        <th className="py-4 px-2 w-[13%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Cost basis</th>
+                                        <th className="py-4 px-2 w-[13%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Current value</th>
+                                        <th className="py-4 px-2 w-[14%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Total profit</th>
+                                        <th className="py-4 px-2 w-[14%] font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider text-center">Daily</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -206,7 +206,7 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                                         ? 'bg-red-50/10'
                                                         : 'hover:bg-gray-100 dark:hover:bg-gray-700/80'}`}
                                         >
-                                            <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                                            <td className="py-4 px-2 text-center" onClick={(e) => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
                                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -214,61 +214,69 @@ export default function PortfolioHoldings({ portfolio, onRefresh, portfolioId, r
                                                     onChange={(e) => toggleDeletionSelection(position.ticker, e as any)}
                                                 />
                                             </td>
-                                            <td className="py-4 px-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div>
-                                                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{position.ticker}</div>
+                                            <td className="py-4 px-2">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="font-semibold text-gray-900 dark:text-white text-sm">{position.ticker}</div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white font-medium">{position.shares}</td>
+                                            <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white">{formatPrice(position.averagePrice)}</td>
+                                            <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white font-medium">{formatPrice(position.costBasis || 0)}</td>
+                                            <td className="py-4 px-2 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{formatPrice(position.totalValue)}</div>
+                                                    <div className="text-xs text-gray-500">{formatPrice(position.currentPrice)}</div>
+                                                </div>
+                                            </td>
+
+                                            <td className="py-4 px-2 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`text-sm font-medium ${position.gainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                        {position.gainLoss >= 0 ? "+" : ""}{formatPrice(position.gainLoss)}
+                                                    </div>
+                                                    <div className={`text-xs ${position.gainLossPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                        {position.gainLossPercent >= 0 ? "▲" : "▼"} {Math.abs(position.gainLossPercent).toFixed(2)}%
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white font-medium">{position.shares}</td>
-                                            <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white">{formatPrice(position.averagePrice)}</td>
-                                            <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white font-medium">{formatPrice(position.costBasis || 0)}</td>
-                                            <td className="py-4 px-4 text-right">
-                                                <div className="text-sm font-medium text-gray-900 dark:text-white">{formatPrice(position.totalValue)}</div>
-                                                <div className="text-xs text-gray-500">{formatPrice(position.currentPrice)}</div>
-                                            </td>
-
-                                            <td className="py-4 px-4 text-right">
-                                                <div className={`text-sm font-medium ${position.gainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                    {position.gainLoss >= 0 ? "+" : ""}{formatPrice(position.gainLoss)}
-                                                </div>
-                                                <div className={`text-xs ${position.gainLossPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                    {position.gainLossPercent >= 0 ? "▲" : "▼"} {Math.abs(position.gainLossPercent).toFixed(2)}%
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4 text-right">
-                                                <div className={`text-sm font-medium ${position.dailyChange && position.dailyChange >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                    {position.dailyChange && position.dailyChange >= 0 ? "+" : ""}{formatPrice(position.dailyChange || 0)}
-                                                </div>
-                                                <div className={`text-xs ${position.dailyChangePercent && position.dailyChangePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                    {position.dailyChangePercent && position.dailyChangePercent >= 0 ? "▲" : "▼"} {position.dailyChangePercent?.toFixed(2)}%
+                                            <td className="py-4 px-2 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`text-sm font-medium ${position.dailyChange && position.dailyChange >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                        {position.dailyChange && position.dailyChange >= 0 ? "+" : ""}{formatPrice(position.dailyChange || 0)}
+                                                    </div>
+                                                    <div className={`text-xs ${position.dailyChangePercent && position.dailyChangePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                        {position.dailyChangePercent && position.dailyChangePercent >= 0 ? "▲" : "▼"} {position.dailyChangePercent?.toFixed(2)}%
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
                                     {/* Total Row */}
                                     <tr className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 font-semibold">
-                                        <td className="py-4 px-4"></td>
-                                        <td className="py-4 px-4 text-sm text-gray-900 dark:text-white">Total</td>
-                                        <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white">{filteredPortfolio.reduce((acc, p) => acc + p.shares, 0)}</td>
-                                        <td className="py-4 px-4"></td>
-                                        <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white">{formatPrice(filteredPortfolio.reduce((acc, p) => acc + (p.costBasis || 0), 0))}</td>
-                                        <td className="py-4 px-4 text-right text-sm text-gray-900 dark:text-white">{formatPrice(filteredPortfolio.reduce((acc, p) => acc + p.totalValue, 0))}</td>
-                                        <td className="py-4 px-4 text-right">
-                                            <div className={`text-sm font-medium ${filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                {filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0) >= 0 ? "+" : ""}{formatPrice(filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0))}
-                                            </div>
-                                            <div className={`text-xs ${filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                {filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) >= 0 ? "▲" : "▼"} {Math.abs(filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) / (filteredPortfolio.length || 1)).toFixed(2)}%
+                                        <td className="py-4 px-2"></td>
+                                        <td className="py-4 px-2 text-sm text-gray-900 dark:text-white text-center">Total</td>
+                                        <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white">{filteredPortfolio.reduce((acc, p) => acc + p.shares, 0)}</td>
+                                        <td className="py-4 px-2"></td>
+                                        <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white">{formatPrice(filteredPortfolio.reduce((acc, p) => acc + (p.costBasis || 0), 0))}</td>
+                                        <td className="py-4 px-2 text-center text-sm text-gray-900 dark:text-white">{formatPrice(filteredPortfolio.reduce((acc, p) => acc + p.totalValue, 0))}</td>
+                                        <td className="py-4 px-2 text-center">
+                                            <div className="flex flex-col items-center">
+                                                <div className={`text-sm font-medium ${filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                    {filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0) >= 0 ? "+" : ""}{formatPrice(filteredPortfolio.reduce((acc, p) => acc + p.gainLoss, 0))}
+                                                </div>
+                                                <div className={`text-xs ${filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                    {filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) >= 0 ? "▲" : "▼"} {Math.abs(filteredPortfolio.reduce((acc, p) => acc + p.gainLossPercent, 0) / (filteredPortfolio.length || 1)).toFixed(2)}%
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-4 text-right">
-                                            <div className={`text-sm font-medium ${filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                {filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0) >= 0 ? "+" : ""}{formatPrice(filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0))}
-                                            </div>
-                                            <div className={`text-xs ${filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                {filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) >= 0 ? "▲" : "▼"} {Math.abs(filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) / (filteredPortfolio.length || 1)).toFixed(2)}%
+                                        <td className="py-4 px-2 text-center">
+                                            <div className="flex flex-col items-center">
+                                                <div className={`text-sm font-medium ${filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                    {filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0) >= 0 ? "+" : ""}{formatPrice(filteredPortfolio.reduce((acc, p) => acc + (p.dailyChange || 0), 0))}
+                                                </div>
+                                                <div className={`text-xs ${filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                                    {filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) >= 0 ? "▲" : "▼"} {Math.abs(filteredPortfolio.reduce((acc, p) => acc + (p.dailyChangePercent || 0), 0) / (filteredPortfolio.length || 1)).toFixed(2)}%
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
