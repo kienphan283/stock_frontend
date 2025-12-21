@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export default function SettingsPage() {
     const { user, login } = useAuth(); // login used to update context user
     const [fullName, setFullName] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -34,6 +35,9 @@ export default function SettingsPage() {
                     throw new Error("Passwords do not match");
                 }
                 updates.password = password;
+                if (currentPassword) {
+                    updates.current_password = currentPassword;
+                }
             }
 
             if (Object.keys(updates).length === 0) {
@@ -53,6 +57,7 @@ export default function SettingsPage() {
             setMessage({ type: 'success', text: "Profile updated successfully!" });
             setPassword("");
             setConfirmPassword("");
+            setCurrentPassword("");
 
             // Ideally we should reload user from context here
             window.location.reload();
@@ -102,6 +107,17 @@ export default function SettingsPage() {
                         <div className="pt-4 border-t border-gray-700">
                             <h3 className="text-lg font-medium text-white mb-4">Change Password</h3>
                             <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Current Password</label>
+                                    <input
+                                        type="password"
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        className="w-full bg-gray-900 border border-gray-700 rounded p-2.5 text-white focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="Enter current password (if set)"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Required if you have a password set.</p>
+                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-1">New Password</label>
                                     <input

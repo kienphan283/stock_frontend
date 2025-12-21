@@ -98,7 +98,7 @@ export async function apiRequest<T>(
 
             try {
                 const errorData = await response.json();
-                errorMessage = errorData.error || errorData.message || errorMessage;
+                errorMessage = errorData.error || errorData.message || errorData.detail || errorMessage;
                 errorDetails = errorData.details || errorData;
             } catch {
                 // If response is not JSON, use status text
@@ -129,6 +129,11 @@ export async function apiRequest<T>(
         // If response has success and data properties, extract data
         if (data.success && data.data !== undefined) {
             return data.data;
+        }
+
+        // If response is successful but doesn't have data property (e.g. { success: true, message: "..." })
+        if (data.success) {
+            return data as unknown as T;
         }
 
         // If response doesn't have success property, assume it's the data itself

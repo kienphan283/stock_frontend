@@ -82,7 +82,7 @@ export const authService = {
         });
     },
 
-    async updateProfile(updates: { full_name?: string; password?: string }) {
+    async updateProfile(updates: { full_name?: string; password?: string; current_password?: string }) {
         const token = localStorage.getItem("token");
         console.log("Debug - updateProfile Token:", token); // DEBUG LOG
 
@@ -94,6 +94,21 @@ export const authService = {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(updates),
+        });
+    },
+
+    // Password Reset Methods
+    async requestPasswordReset(email: string) {
+        return apiRequest(`${AUTH_API_URL}/forgot-password`, {
+            method: "POST",
+            body: JSON.stringify({ email }),
+        });
+    },
+
+    async resetPassword(data: any) {
+        return apiRequest<LoginResponse>(`${AUTH_API_URL}/reset-password`, {
+            method: "POST",
+            body: JSON.stringify(data),
         });
     },
 };

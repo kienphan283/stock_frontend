@@ -31,11 +31,40 @@ export async function apiRequest<T>(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    if (process.env.NODE_ENV === 'development') {
-      console.error("API Error Response:", errorText);
+    // Demo Stability Fix: Auto-logout on 401 Unauthorized
+    if (response.status === 401) {
+      if (typeof window !== "undefined") {
+        console.warn("Session expired (401). Redirecting to login...");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/sign-in";
+        return {} as T; // Prevent further error handling
+      }
     }
-    throw new Error(`API Error: ${response.statusText}`);
+
+    let errorMessage = `API Error: ${response.statusText}`;
+    let errorDetails = null;
+
+    try {
+      const errorData = await response.json();
+      // Handle FastAPI "detail" field and other common error formats
+      errorMessage = errorData.detail || errorData.error || errorData.message || errorMessage;
+      errorDetails = errorData;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error("API Error Response parsed:", errorData);
+      }
+    } catch (e) {
+      // If parsing fails, use text
+      const errorText = await response.text();
+      console.error("API Error Response (text):", errorText);
+      errorMessage = errorText || errorMessage;
+    }
+
+    const error = new Error(errorMessage);
+    (error as any).details = errorDetails;
+    (error as any).status = response.status;
+    throw error;
   }
 
   const data: ApiResponse<T> = await response.json();

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
@@ -19,20 +20,18 @@ export default function ForgotPasswordPage() {
         setError(null);
         setSuccess(null);
 
-        // MOCK API CALL
         try {
-            // Simulate network delay
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
             if (!email.includes("@")) {
                 throw new Error("Please enter a valid email address");
             }
 
+            await authService.requestPasswordReset(email);
+
             setSuccess("OTP sent to your email!");
 
-            // Redirect to OTP page after delay
+            // Redirect to Reset Password page after delay
             setTimeout(() => {
-                router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+                router.push(`/reset-password?email=${encodeURIComponent(email)}`);
             }, 1000);
 
         } catch (err: any) {
